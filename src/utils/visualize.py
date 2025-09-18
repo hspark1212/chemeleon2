@@ -57,7 +57,7 @@ class Visualizer:
                 camera=dict(
                     up=dict(x=0, y=0, z=1),
                     center=dict(x=0, y=0, z=0),
-                    eye=dict(x=0, y=1, z=1),
+                    eye=dict(x=-2, y=0, z=0),
                     projection=dict(type="orthographic"),
                 ),
                 aspectmode="data",

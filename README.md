@@ -21,31 +21,53 @@ cd chemeleon2
 uv sync
 ```
 
+## (Optional) Pytorch Installation with CUDA
+
+After running `uv sync`, install a PyTorch version that matches your CUDA setup to avoid compatibility issues.
+Refer to the official [pytorch website](https://pytorch.org/get-started/previous-versions/).
+
+<details>
+<summary> Example </summary>
+This example is to install PyTorch 2.7.0 with CUDA 12.8:
+```bash
+pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
+```
+</details>
+
 ## Quick Start
 
 ### Train VAE
+
 ```bash
 python src/train_vae.py experiment=<vae_experiment>
 ```
 
 ### Train LDM (requires trained VAE)
+
 ```bash
 python src/train_ldm.py experiment=<ldm_experiment>
 ```
 
 ### Train RL (requires trained LDM)
+
 ```bash
 python src/train_rl.py experiment=<rl_experiment>
-# or use the shell script
-./scripts/train_rl.sh
+```
+
+### Train Predictor (optional, for property prediction)
+
+```bash
+python src/train_predictor.py experiment=<predictor_experiment>
 ```
 
 ### Generate Samples
+
 ```bash
 python src/sample.py <sampling_configs>
 ```
 
 ### Evaluate Models
+
 ```bash
 python src/evaluate.py <evaluation_configs>
 ```
@@ -59,11 +81,13 @@ The project uses Hydra for configuration management:
 - `configs/{trainer,logger,callbacks}/`: Training infrastructure
 
 ### Example: Override parameters
+
 ```bash
 python src/train_ldm.py trainer.max_epochs=100 data.batch_size=32
 ```
 
 ### Example: Resume from checkpoint
+
 ```bash
 python src/train_ldm.py ckpt_path=/path/to/checkpoint.ckpt
 ```
