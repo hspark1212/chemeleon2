@@ -23,15 +23,14 @@ uv sync
 
 ## (Optional) Pytorch Installation with CUDA
 
-After running `uv sync`, install a PyTorch version that matches your CUDA setup to avoid compatibility issues.
-Refer to the official [pytorch website](https://pytorch.org/get-started/previous-versions/).
+After completing `uv sync`, install a PyTorch version compatible with your CUDA environment to prevent compatibility issues.
+For version-specific installation commands, visit the [PyTorch official website](https://pytorch.org/get-started/previous-versions/).
 
 <details>
 <summary> Example </summary>
-This example is to install PyTorch 2.7.0 with CUDA 12.8:
-```bash
-pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
-```
+For PyTorch 2.7.0 with CUDA 12.8:
+<pre><code>pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128</code></pre>
+
 </details>
 
 ## Quick Start
