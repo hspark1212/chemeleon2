@@ -1,0 +1,26 @@
+# @package _global_
+defaults:
+  - override /data: mp-20
+  - override /rl_module: rl_module
+  - override /callbacks: default
+  - override /logger: wandb
+  - override /scheduler: constant
+  - override /paths: default
+  - override /hydra: default
+
+data:
+  batch_size: 320
+
+rl_module:
+  ldm_ckpt_path: ckpts/mp_20/ldm/ldm_null_4tfw67aq.ckpt
+
+  rl_configs:
+    num_group_samples: 1
+    group_reward_norm: False
+
+  reward_fn:
+    reward_type: dng
+
+logger:
+  wandb:
+    name: rl_dng_po

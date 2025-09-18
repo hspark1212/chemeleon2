@@ -3,7 +3,6 @@ import tempfile
 import shutil
 import warnings
 from collections import defaultdict
-from functools import partial
 from pathlib import Path
 import gzip
 import pickle
@@ -227,7 +226,10 @@ class Metrics:
     ...     sm=None,
     ...     calc=None,
     ... )
-    >>>
+    >>> # Compute metrics
+    >>> results = m.compute(gen_structures=gen_structures)
+    >>> # Convert results to DataFrame
+    >>> df = m.to_dataframe()
     """
 
     metrics: list[str] = None
@@ -296,9 +298,13 @@ class Metrics:
         if "composition_validity" in self.metrics and self._smact_validity_fn is None:
             from smact.screening import smact_validity
 
-            self._smact_validity_fn = partial(
-                smact_validity, oxidation_states_set="icsd24"
-            )
+            def safe_smact_validity(comp):
+                try:
+                    return smact_validity(comp, oxidation_states_set="icsd24")
+                except TypeError:
+                    return False
+
+            self._smact_validity_fn = safe_smact_validity
 
         # _reference_structure_features: `structure_diversity`
         if (
