@@ -1,4 +1,0 @@
-encoder:
-  _target_: src.vae_module.positional_embeddings.NoPositionalEmbedding
-decoder:
-  _target_: src.vae_module.positional_embeddings.NoPositionalEmbedding

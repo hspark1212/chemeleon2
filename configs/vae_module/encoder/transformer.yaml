@@ -9,5 +9,4 @@ dropout: 0.0
 norm_first: true
 bias: true
 num_layers: 8
-index_embedding: ${pos_embedding.encoder}
-
+index_embedding: ${vae_module.index_embedding.encoder}

@@ -1,8 +1,0 @@
-encoder:
-  _target_: src.vae_module.positional_embeddings.LearnedPositionalEmbedding
-  embedding_dim: ${vae_module.encoder.d_model}
-  max_len: ${vae_module.max_atoms}
-decoder:
-  _target_: src.vae_module.positional_embeddings.LearnedPositionalEmbedding
-  embedding_dim: ${vae_module.decoder.d_model}
-  max_len: ${vae_module.max_atoms}
