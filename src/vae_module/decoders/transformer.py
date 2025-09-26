@@ -14,6 +14,9 @@ from src.utils.scatter import scatter_mean
 from src.vae_module.positional_embeddings import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
+    NoPositionalEmbedding,
+    GlobalNumAtomsEmbedding,
+
 )
 
 
@@ -58,7 +61,7 @@ class TransformerDecoder(nn.Module):
         bias: bool = True,
         num_layers: int = 6,
         max_num_atoms: int = 512,
-        index_embedding: PositionalEmbedding = SinusoidalPositionalEmbedding(),
+        index_embedding: str = 'sinusoidal',
 
     ):
         super().__init__()
@@ -91,7 +94,18 @@ class TransformerDecoder(nn.Module):
         self.frac_coords_head = nn.Linear(d_model, 3, bias=False)
         self.lattice_head = nn.Linear(d_model, 6, bias=False)
 
-        self.index_embedding = index_embedding
+        self.index_embedding_type = index_embedding
+        if index_embedding == 'sinusoidal':
+            self.index_embedding = SinusoidalPositionalEmbedding()
+        elif index_embedding == 'none' or index_embedding is None:
+            self.index_embedding = NoPositionalEmbedding()
+        elif index_embedding == 'global_num_atoms':
+            self.index_embedding = GlobalNumAtomsEmbedding(
+                embedding_dim=d_model,
+                mode='sinusoidal',
+            )
+        else:
+            raise ValueError(f"Unknown index_embedding: {index_embedding}")
 
     @property
     def hidden_dim(self) -> int:
@@ -111,11 +125,19 @@ class TransformerDecoder(nn.Module):
         x = encoded_batch["x"]
 
         # Positional embedding
-        x += self.index_embedding(encoded_batch["token_idx"], self.d_model)
+        breakpoint()
+        if self.index_embedding_type == 'none' or self.index_embedding_type is None:
+            pass
+        elif self.index_embedding_type == 'global_num_atoms':
+            x += self.index_embedding(
+                encoded_batch["num_atoms"], encoded_batch["num_atoms"],
+                #scatter_mean(encoded_batch["batch"], encoded_batch["batch"], dim=0).to(torch.long) + 1,
+            )
+        else:
+            x += self.index_embedding(encoded_batch["token_idx"], self.d_model)
+
         # Convert from PyG batch to dense batch with padding
         x, token_mask = to_dense_batch(x, encoded_batch["batch"])
-        torch.unique(encoded_batch["token_idx"])
-        torch.unique(encoded_batch["token_idx"], return_counts=True)
         # Transformer forward pass
         x = self.transformer.forward(x, src_key_padding_mask=(~token_mask))
         x = x[token_mask]

@@ -53,9 +53,75 @@ class NoPositionalEmbedding(PositionalEmbedding):
         return torch.zeros((*indices.shape, emb_dim), device=indices.device)
 
 
+class GlobalNumAtomsEmbedding(nn.Module):
+    """
+    Embed a per-graph scalar (number of atoms) and broadcast it to all nodes.
+
+    Args:
+        embedding_dim: Output feature dimension.
+        mode: "learned" (nn.Embedding) or "sinusoidal".
+        max_value: Max integer value expected for num_atoms (only for "learned").
+        sinusoidal_max_len: Base used by the sinusoidal encoder (only for "sinusoidal").
+
+    Shapes:
+        num_atoms: Long tensor, shape (B,) with number of atoms per graph.
+        num_nodes_per_graph: Long tensor, shape (B,) with node counts per graph.
+
+    Returns:
+        Tensor of shape (sum(num_nodes_per_graph), embedding_dim), containing the
+        same embedding repeated for all nodes belonging to the same graph.
+    """
+
+    def __init__(
+        self,
+        embedding_dim: int,
+        mode: str = "sinusoidal",
+        max_value: int = 8192,
+        sinusoidal_max_len: int = 2048,
+    ) -> None:
+        super().__init__()
+        self.embedding_dim = embedding_dim
+        self.mode = mode.lower()
+        if self.mode == "learned":
+            # +1 so value==max_value is in-bounds
+            self.table = nn.Embedding(max_value + 1, embedding_dim)
+        elif self.mode == "sinusoidal":
+            # Reuse the sinusoidal positional embedding defined above
+            self.sine = SinusoidalPositionalEmbedding(max_len=sinusoidal_max_len)
+            if embedding_dim % 2 != 0:
+                raise ValueError("Sinusoidal mode requires an even embedding_dim.")
+        else:
+            raise ValueError(f"Unknown mode '{mode}'. Use 'learned' or 'sinusoidal'.")
+
+    def forward(self, num_atoms: Tensor, num_nodes_per_graph: Tensor) -> Tensor:
+        if num_atoms.dim() != 1 or num_nodes_per_graph.dim() != 1:
+            raise ValueError("num_atoms and num_nodes_per_graph must be 1D tensors.")
+        if num_atoms.shape[0] != num_nodes_per_graph.shape[0]:
+            raise ValueError("num_atoms and num_nodes_per_graph must have same length (B).")
+
+        num_atoms = num_atoms.to(dtype=torch.long, device=num_nodes_per_graph.device)
+        num_nodes_per_graph = num_nodes_per_graph.to(dtype=torch.long)
+
+        # Broadcast per-graph scalar to per-node indices: [10, 4, ...] -> [10,10,...,4,4,...]
+        per_node_indices = torch.repeat_interleave(num_atoms, num_nodes_per_graph)
+
+        if self.mode == "learned":
+            max_idx = int(per_node_indices.max().item()) if per_node_indices.numel() else -1
+            if max_idx >= self.table.num_embeddings:
+                raise ValueError(
+                    f"num_atoms contains value {max_idx}, but embedding table "
+                    f"has only {self.table.num_embeddings} entries. "
+                    "Increase max_value when constructing GlobalNumAtomsEmbedding."
+                )
+            return self.table(per_node_indices)  # (N_total, embedding_dim)
+
+        # Sinusoidal path
+        return self.sine(per_node_indices, self.embedding_dim)  # (N_total, embedding_dim)
+
 __all__ = [
     "PositionalEmbedding",
     "SinusoidalPositionalEmbedding",
     "LearnedPositionalEmbedding",
     "NoPositionalEmbedding",
+    "GlobalNumAtomsEmbedding",
 ]

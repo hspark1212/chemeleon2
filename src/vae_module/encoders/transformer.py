@@ -67,7 +67,7 @@ class TransformerEncoder(nn.Module):
         bias: bool = True,
         num_layers: int = 6,
         max_num_atoms: int = 512,
-        index_embedding: PositionalEmbedding = SinusoidalPositionalEmbedding(),
+        index_embedding: str = 'sinusoidal',
     ):
         super().__init__()
 
@@ -105,7 +105,18 @@ class TransformerEncoder(nn.Module):
             num_layers=num_layers,
         )
 
-        self.index_embedding = index_embedding
+        self.index_embedding_type = index_embedding
+        if index_embedding == 'sinusoidal':
+            self.index_embedding = SinusoidalPositionalEmbedding()
+        elif index_embedding == 'none' or index_embedding is None:
+            self.index_embedding = NoPositionalEmbedding()
+        elif index_embedding == 'global_num_atoms':
+            self.index_embedding = GlobalNumAtomsEmbedding(
+                embedding_dim=d_model,
+                mode='sinusoidal',
+            )
+        else:
+            raise ValueError(f"Unknown index_embedding: {index_embedding}")
 
     @property
     def hidden_dim(self):
@@ -130,7 +141,15 @@ class TransformerEncoder(nn.Module):
         x += self.frac_coords_embedder(batch.frac_coords)
 
         # Positional embedding
-        x += self.index_embedding(batch.token_idx, self.d_model)
+        if self.index_embedding_type == 'none' or self.index_embedding_type is None:
+            pass
+        elif self.index_embedding_type == 'global_num_atoms':
+            x += self.index_embedding(
+                batch["num_atoms"], batch["num_atoms"],
+                #scatter_mean(encoded_batch["batch"], encoded_batch["batch"], dim=0).to(torch.long) + 1,
+            )
+        else:
+            x += self.index_embedding(batch["token_idx"], self.d_model)
 
         # Convert from PyG batch to dense batch with padding
         x, token_mask = to_dense_batch(x, batch.batch)

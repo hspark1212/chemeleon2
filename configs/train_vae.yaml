@@ -37,3 +37,12 @@ resume_from: null
 
 # seed for random number generators in pytorch, numpy and python.random
 seed: 0
+
+
+pos_embed:
+  decoder: 'sinusoidal'
+  encoder: 'sinusoidal'
+  # decoder: 'none'
+  # encoder: 'none'
+
+max_atoms: 2048

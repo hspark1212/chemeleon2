@@ -1,7 +1,6 @@
 defaults:
   - encoder: transformer
   - decoder: transformer
-  - pos_embedding: sinusoidal
 
 _target_: src.vae_module.vae_module.VAEModule
 
@@ -41,10 +40,3 @@ scheduler: ${scheduler}
 
 max_atoms: 100
 
-index_embedding:
-  encoder:
-    _target_: src.vae_module.positional_embeddings.SinusoidalPositionalEmbedding
-    max_len: ${vae_module.max_atoms}
-  decoder:
-    _target_: src.vae_module.positional_embeddings.SinusoidalPositionalEmbedding
-    max_len: ${vae_module.max_atoms}

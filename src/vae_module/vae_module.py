@@ -30,6 +30,7 @@ class VAEModule(LightningModule):
         structure_matcher: StructureMatcher,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
+        max_atoms: int = 100,
     ) -> None:
         super().__init__()
 
@@ -53,6 +54,7 @@ class VAEModule(LightningModule):
 
         # Structure matcher for evaluation
         self.sm = structure_matcher
+        self.max_atoms = max_atoms
 
     def encode(self, batch: CrystalBatch) -> dict:
         encoded = self.encoder(batch)
