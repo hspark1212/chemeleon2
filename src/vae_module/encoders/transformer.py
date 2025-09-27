@@ -13,6 +13,9 @@ from torch_geometric.utils import to_dense_batch
 from src.vae_module.positional_embeddings import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
+    NoPositionalEmbedding,
+    GlobalNumAtomsEmbedding,
+    SinusoidalPositionalEmbedding,
 )
 
 

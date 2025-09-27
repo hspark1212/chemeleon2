@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=01:00:00
+#SBATCH --time=10:00:00
 # SBATCH --array=0-7%1
 
 
@@ -53,6 +53,10 @@ python -u src/train_vae.py \
         experiment=mp_40/vae_dng.yaml \
         paths.data_dir=/home/u5bd/lleon.u5bd/chemeleon/data \
     trainer.devices=-1\
+    "$@" \
+    
+    # vae_module.encoder.index_embedding=none \
+    # vae_module.decoder.index_embedding=none
 
 
 # srun -N1 -n2 --gpus-per-task=1 \

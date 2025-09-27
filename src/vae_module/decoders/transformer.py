@@ -125,7 +125,6 @@ class TransformerDecoder(nn.Module):
         x = encoded_batch["x"]
 
         # Positional embedding
-        breakpoint()
         if self.index_embedding_type == 'none' or self.index_embedding_type is None:
             pass
         elif self.index_embedding_type == 'global_num_atoms':
