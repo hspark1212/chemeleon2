@@ -2,7 +2,7 @@
 
 wandb:
   _target_: lightning.pytorch.loggers.wandb.WandbLogger
-  name: ""
+  name: "${name}"
   save_dir: "${paths.output_dir}"
   offline: False
   id: null # pass correct id to resume experiment!

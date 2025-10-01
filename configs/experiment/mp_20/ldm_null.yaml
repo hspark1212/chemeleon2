@@ -17,6 +17,6 @@ data:
 
 logger:
   wandb:
-    name: "ldm_dng"
+    name: "mp20-${name}"
     group: "${task_name}/${data.dataset_type}"
     tags: ["ldm", "dng", "null_condition"]

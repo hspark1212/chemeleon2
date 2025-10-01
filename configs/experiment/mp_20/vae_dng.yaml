@@ -10,7 +10,7 @@ defaults:
   - override /hydra: default
 
 trainer:
-  max_epochs: 5000
+  max_epochs: 10000
 
 vae_module:
   atom_type_predict: true

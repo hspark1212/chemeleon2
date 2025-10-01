@@ -11,7 +11,7 @@ defaults:
   - experiment: null
 
 trainer:
-  max_epochs: 5000
+  max_epochs: 1000
 
 data:
   mace_features: False
@@ -28,6 +28,7 @@ callbacks:
 
 # task name, determines output directory path
 task_name: "train_vae"
+name: "vae-default"
 
 # Load a pre-trained checkpoint
 ckpt_path: null

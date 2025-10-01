@@ -1,6 +1,6 @@
 # @package _global_
 defaults:
-  - override /data: mp-20
+  - override /data: mp-40
   - override /ldm_module: ldm_module
   - override /callbacks: default
   - override /logger: wandb

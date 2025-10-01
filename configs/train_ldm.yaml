@@ -29,6 +29,8 @@ callbacks:
 
 # task name, determines output directory path
 task_name: "train_ldm"
+name: "ldm-default"
+
 
 # simply provide checkpoint path to resume training
 ckpt_path: null

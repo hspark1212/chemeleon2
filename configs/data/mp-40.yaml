@@ -1,6 +1,6 @@
 _target_: src.data.datamodule.DataModule
 data_dir: ${paths.data_dir}/mp-40
-batch_size: 256
+batch_size: 1024
 dataset_type: "mp_40"
 target_condition: null
 mace_features: false

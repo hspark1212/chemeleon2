@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=10:00:00
+#SBATCH --time=20:00:00
 # SBATCH --array=0-7%1
 
 
@@ -49,8 +49,8 @@ echo "Logger PID: $!"
 #     --gpus=2 \
 #     --ntasks-per-node=1 \
 #     --gpus-per-node=2 \
-python -u src/train_vae.py \
-        experiment=mp_20/vae_dng.yaml \
+python -u src/train_ldm.py \
+        experiment=mp_40/ldm_null.yaml \
         paths.data_dir=/scratch/u5bd/lleon.u5bd/chemeleon2/data \
     trainer.devices=-1\
     "$@" \
