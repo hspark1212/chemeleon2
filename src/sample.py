@@ -15,7 +15,7 @@ DEFAULT_MODEL_PATH = "ckpts/ldm/kl_1e-5_last/model.ckpt"  # TODO: update this pa
 
 
 def sample(
-    num_samples: int = 100,
+    num_samples: int = 10000,
     batch_size: int = 2000,
     compositions: list = None,
     text_prompts: list = None,
@@ -34,7 +34,7 @@ def sample(
     elif text_prompts are provided, it performs the TSP (Text-to-Structure Prediction) task.
     If neither compositions nor text_prompts are provided, it performs the DNG (De Novo Generation) task.
 
-    :param num_samples: Total number of samples to generate, defaults to 100
+    :param num_samples: Total number of samples to generate, defaults to 10000
     :param batch_size: Number of samples to generate in each batch, defaults to 2000
     :param compositions: List of compositions to generate structures for.
         If provided, performs the CSP task, defaults to None

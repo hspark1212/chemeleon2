@@ -133,7 +133,8 @@ def _structure_diversity(ctx):
     fmd_score = frechet_distance(
         gen_embeddings=gen_features, ref_embeddings=ref_features
     )
-    return fmd_score
+    inv_fmd_score = 1 / (1 + fmd_score)  # Inverse FMD for interpretability
+    return inv_fmd_score
 
 
 @register_metric("composition_diversity")
@@ -143,7 +144,8 @@ def _composition_diversity(ctx):
     fmd_score = frechet_distance(
         gen_embeddings=gen_features, ref_embeddings=ref_features
     )
-    return fmd_score
+    inv_fmd_score = 1 / (1 + fmd_score)  # Inverse FMD for interpretability
+    return inv_fmd_score
 
 
 @register_metric("synthesizability")
@@ -163,8 +165,8 @@ class Metrics:
     2. Novel: Identifies structures not found in the reference dataset
     3. E Above Hull: Calculates the energy above hull for each structure (Metastable/Stability)
     4. Composition Validity: Checks if the composition is valid using SMACT
-    5. Structure Diversity: Computes Fréchet distance between generated and reference structure embeddings from VAE
-    6. Composition Diversity: Computes Fréchet distance between generated and reference composition embeddings from VAE
+    5. Structure Diversity: Computes inverse Fréchet distance (1/(1+FMD)) between generated and reference structure embeddings from VAE (higher is better)
+    6. Composition Diversity: Computes inverse Fréchet distance (1/(1+FMD)) between generated and reference composition embeddings from VAE (higher is better)
 
     Parameters
     ----------
