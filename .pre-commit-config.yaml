@@ -46,3 +46,22 @@ repos:
 
 # Note: pytest is intentionally excluded from pre-commit hooks
 # Tests run in CI only to keep pre-commit fast (< 15 seconds target)
+
+# ============================================================================
+# Optional: Claude Code Auto-Fix Integration
+# ============================================================================
+# To enable automatic fixing of Ruff/pyright violations using Claude Code:
+#
+# 1. Install Claude Code CLI: https://claude.com/claude-code
+# 2. Run the wrapper script when pre-commit fails:
+#    ./scripts/claude-fix.sh
+#
+# Or run the auto-fix script directly:
+#    ./.git-hooks/claude-autofix.sh
+#
+# The auto-fix tool will:
+# - Attempt automatic fixes for Ruff violations
+# - Run baseline tests to verify no regressions
+# - Show you a diff of changes for review
+#
+# This is opt-in and does not block commits if you prefer manual fixes.
