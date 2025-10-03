@@ -1,6 +1,6 @@
-# Chameleon2
+# Chemeleon2
 
-A generative machine learning framework for crystal structure prediction using Variational Autoencoders (VAE), Latent Diffusion Models (LDM), and Reinforcement Learning (RL).
+A generative machine learning framework for crystals in latent space. It combines Variational Autoencoders (VAE), Latent Diffusion Models (LDM), and Reinforcement Learning (RL).
 
 ## Overview
 
