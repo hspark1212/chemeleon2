@@ -7,10 +7,16 @@ Auto-generated from all feature plans. Last updated: 2025-10-03
 - Python 3.11+ (already specified in pyproject.toml) + Ruff (formatter + linter), pre-commit framework, pytest, GitHub Actions (001-this-repository-was)
 - Configuration files (.toml, .yaml), git repository (001-this-repository-was)
 
+## Development Environment
+- **Python**: Use `.venv/bin/python` (Python 3.11.13 in virtual environment)
+- **Virtual Environment**: `.venv/` at repository root (already activated in shell)
+- **Package Manager**: uv
+
 ## Project Structure
 ```
 src/
 tests/
+.venv/        # Virtual environment - ALWAYS use this Python
 ```
 
 ## Commands

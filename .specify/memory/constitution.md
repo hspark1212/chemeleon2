@@ -48,9 +48,9 @@ All experiments MUST log random seeds, data splits, and configuration snapshots.
 **Rationale**: Scientific validity requires reproducibility. ML experiments have multiple sources of randomness (initialization, data shuffling, stochastic training). Comprehensive logging is the only defense against irreproducible results.
 
 ### V. Test-Driven Development (NON-NEGOTIABLE)
-All new features MUST have tests written BEFORE implementation. Baseline tests MUST validate existing functionality before refactoring. Tests MUST fail initially (Red-Green-Refactor cycle). Pre-commit hooks MUST enforce test execution.
+All new features MUST have tests written BEFORE implementation. Baseline tests MUST validate existing functionality before refactoring. Tests MUST fail initially (Red-Green-Refactor cycle). CI/CD pipelines MUST enforce comprehensive test execution before merge. Pre-commit hooks SHOULD focus on fast feedback (formatting, linting) to maintain developer velocity, with test execution reserved for CI/CD.
 
-**Rationale**: ML code is particularly prone to silent failures (e.g., incorrect tensor shapes, gradient bugs, metric calculation errors). Tests catch these issues early. The TDD cycle ensures tests actually validate the intended behavior.
+**Rationale**: ML code is particularly prone to silent failures (e.g., incorrect tensor shapes, gradient bugs, metric calculation errors). Tests catch these issues early. The TDD cycle ensures tests actually validate the intended behavior. Pre-commit hooks provide immediate feedback on code style, while CI/CD gates ensure no untested code reaches the main branch.
 
 ## Testing & Quality Standards
 
@@ -104,4 +104,4 @@ All new features MUST have tests written BEFORE implementation. Baseline tests M
 - The CLAUDE.md file provides runtime development guidance derived from this constitution
 - Template files in `.specify/templates/` MUST align with these principles
 
-**Version**: 2.0.0 | **Ratified**: 2025-10-03 | **Last Amended**: 2025-10-03
+**Version**: 2.0.1 | **Ratified**: 2025-10-03 | **Last Amended**: 2025-10-03
