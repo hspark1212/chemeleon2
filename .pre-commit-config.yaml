@@ -1,0 +1,48 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+
+repos:
+  # Ruff - Python formatter and linter (combined tool)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4  # Pinned version for consistency between local and CI
+    hooks:
+      # Ruff formatter - must run BEFORE linter
+      - id: ruff-format
+        name: "Ruff Format"
+        stages: [commit]
+
+      # Ruff linter - runs after formatting
+      - id: ruff
+        name: "Ruff Lint"
+        args: [--fix]  # Auto-fix violations when possible
+        stages: [commit]
+
+  # Pyright - Static type checker for Python
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.390  # Pinned version for consistency
+    hooks:
+      - id: pyright
+        name: "Pyright Type Check"
+        stages: [commit]
+
+  # Pre-commit hooks - File validation utilities
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0  # Pinned version for consistency
+    hooks:
+      # YAML file validation
+      - id: check-yaml
+        name: "Check YAML"
+        files: \.yaml$
+
+      # TOML file validation
+      - id: check-toml
+        name: "Check TOML"
+        files: \.toml$
+
+      # JSON file validation
+      - id: check-json
+        name: "Check JSON"
+        files: \.json$
+
+# Note: pytest is intentionally excluded from pre-commit hooks
+# Tests run in CI only to keep pre-commit fast (< 15 seconds target)

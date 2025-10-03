@@ -55,4 +55,45 @@ addopts = ["-ra", "-q", "--strict-markers"]
 filterwarnings = [
     "ignore::UserWarning:torch.nn.modules.transformer",
     "ignore::UserWarning:lightning.pytorch.utilities.parsing",
-] 
+]
+
+[tool.ruff]
+# Python version target
+target-version = "py311"
+# Black-compatible line length
+line-length = 88
+
+[tool.ruff.lint]
+# Rule sets to enable:
+select = [
+    "F",    # F: Pyflakes errors (undefined names, unused imports)
+    "E",    # E: PEP 8 style errors (indentation, whitespace)
+    "W",    # W: PEP 8 style warnings (deprecated features)
+    "I",    # I: isort import sorting
+    "N",    # N: PEP 8 naming conventions
+    "D",    # D: Docstrings (pydocstyle)
+    "UP",   # UP: pyupgrade (modernize Python syntax)
+    "ANN",  # ANN: Type annotations (flake8-annotations)
+    "S",    # S: Security checks (flake8-bandit)
+    "B",    # B: Bugbear (design issues, anti-patterns)
+    "C90",  # C90: McCabe complexity checker
+]
+
+[tool.ruff.lint.pydocstyle]
+# Docstring style convention
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+# Maximum cyclomatic complexity threshold
+max-complexity = 10
+
+[tool.pyright]
+# Type checking mode - strict enforces comprehensive type safety
+typeCheckingMode = "strict"
+# Python version target - must match project requirements
+pythonVersion = "3.11"
+# Unknown type warnings - warn instead of error for gradual typing adoption
+reportMissingTypeStubs = "warning"
+reportUnknownMemberType = "warning"
+reportUnknownArgumentType = "warning"
+reportUnknownVariableType = "warning" 

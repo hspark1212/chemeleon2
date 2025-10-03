@@ -102,7 +102,7 @@
 
 ## Phase 3.3: Configuration Files (Only After Baseline Tests Pass)
 
-- [ ] **T008 [P]** Configure Ruff in pyproject.toml
+- [x] **T008 [P]** Configure Ruff in pyproject.toml
   - Add `[tool.ruff]` section to existing `pyproject.toml`
   - Set `target-version = "py311"`
   - Set `line-length = 88`
@@ -112,7 +112,7 @@
   - Add `[tool.ruff.lint.mccabe]` with `max-complexity = 10`
   - Add inline comments explaining each rule category (e.g., "# F: Pyflakes errors", "# E/W: PEP 8 style", "# D: Docstrings", etc.) per FR-008
 
-- [ ] **T008a [P]** Configure pyright in pyproject.toml
+- [x] **T008a [P]** Configure pyright in pyproject.toml
   - Add `[tool.pyright]` section to existing `pyproject.toml`
   - Set `typeCheckingMode = "strict"`
   - Set `pythonVersion = "3.11"`
@@ -122,7 +122,7 @@
   - Set `reportUnknownVariableType = "warning"`
   - Add inline comments explaining strict mode settings per FR-018, FR-019
 
-- [ ] **T009 [P]** Create pre-commit configuration in `.pre-commit-config.yaml`
+- [x] **T009 [P]** Create pre-commit configuration in `.pre-commit-config.yaml`
   - Add ruff-pre-commit repo with specific pinned version (e.g., `v0.1.9`, NOT `latest` or branch refs) to ensure local/CI consistency per edge case spec.md:L89
   - Configure ruff-format hook
   - Configure ruff lint hook with `--fix` arg
@@ -131,7 +131,7 @@
   - Ensure ruff-format runs before ruff lint, then pyright
   - Exclude pytest from pre-commit hooks
 
-- [ ] **T010 [P]** Create GitHub Actions workflow in `.github/workflows/ci.yml`
+- [x] **T010 [P]** Create GitHub Actions workflow in `.github/workflows/ci.yml`
   - Set name: "CI"
   - Trigger on pull_request to main/develop branches
   - Trigger on push to main branch
