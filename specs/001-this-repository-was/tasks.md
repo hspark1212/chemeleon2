@@ -203,19 +203,19 @@
 
 ## Phase 3.5: Application & Verification
 
-- [ ] **T016** Apply Ruff formatting to existing codebase
+- [x] **T016** Apply Ruff formatting to existing codebase
   - Run: `ruff format .` from repository root
   - Review changes (should only affect code style)
   - Commit as single "formatting: apply Ruff standards to codebase"
   - **Dependency**: Requires T008 (Ruff configuration)
 
-- [ ] **T017** Apply Ruff auto-fixes to existing codebase
+- [x] **T017** Apply Ruff auto-fixes to existing codebase
   - Run: `ruff check --fix .` from repository root
   - Review auto-fixed violations
   - Commit as "lint: apply Ruff auto-fixes"
   - **Dependency**: Requires T016 (formatting first)
 
-- [ ] **T018** Re-run baseline tests after formatting changes
+- [x] **T018** Re-run baseline tests after formatting changes
   - Execute: `pytest tests/baseline/ -v -m baseline`
   - All tests must still PASS (verify no regressions)
   - Compare results with T007 output
