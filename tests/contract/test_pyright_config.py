@@ -1,7 +1,7 @@
 """Contract test for pyright configuration.
 
 This test validates that pyproject.toml contains a valid pyright configuration
-with strict type checking settings as per project requirements.
+with basic type checking settings as per project requirements.
 """
 
 import tomllib
@@ -41,37 +41,18 @@ def test_pyright_section_exists(pyproject_data) -> None:
 
 
 def test_pyright_type_checking_mode(pyproject_data) -> None:
-    """Test that typeCheckingMode is set to 'strict'."""
+    """Test that typeCheckingMode is set to 'basic'."""
     pyright_config = pyproject_data["tool"]["pyright"]
     assert "typeCheckingMode" in pyright_config, "typeCheckingMode not configured"
-    assert pyright_config["typeCheckingMode"] == "strict", (
-        f"Expected typeCheckingMode='strict', got '{pyright_config['typeCheckingMode']}'"
-    )
+    assert (
+        pyright_config["typeCheckingMode"] == "basic"
+    ), f"Expected typeCheckingMode='basic', got '{pyright_config['typeCheckingMode']}'"
 
 
 def test_pyright_python_version(pyproject_data) -> None:
     """Test that pythonVersion is set to '3.11'."""
     pyright_config = pyproject_data["tool"]["pyright"]
     assert "pythonVersion" in pyright_config, "pythonVersion not configured"
-    assert pyright_config["pythonVersion"] == "3.11", (
-        f"Expected pythonVersion='3.11', got '{pyright_config['pythonVersion']}'"
-    )
-
-
-def test_pyright_unknown_type_warnings(pyproject_data) -> None:
-    """Test that unknown type warnings are configured at warning level."""
-    pyright_config = pyproject_data["tool"]["pyright"]
-
-    # Check all four unknown type warning settings
-    warning_settings = [
-        "reportMissingTypeStubs",
-        "reportUnknownMemberType",
-        "reportUnknownArgumentType",
-        "reportUnknownVariableType",
-    ]
-
-    for setting in warning_settings:
-        assert setting in pyright_config, f"{setting} not configured in pyright config"
-        assert pyright_config[setting] == "warning", (
-            f"Expected {setting}='warning', got '{pyright_config[setting]}'"
-        )
+    assert (
+        pyright_config["pythonVersion"] == "3.11"
+    ), f"Expected pythonVersion='3.11', got '{pyright_config['pythonVersion']}'"

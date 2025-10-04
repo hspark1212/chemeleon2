@@ -403,6 +403,33 @@ tests/
 
 ---
 
+## Decision 13: Pyright Type Checking Mode
+
+**Decision**: Use pyright in basic mode
+**Rationale**:
+- **User Feedback**: "strict mode is not realistic for current codebase"
+- Basic mode provides essential type checking without overwhelming strictness
+- Allows gradual type hint adoption without blocking development
+- Catches common type errors while being practical for ML/scientific code
+- Reduces configuration complexity by removing granular warning settings
+
+**Configuration**:
+```toml
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.11"
+```
+
+**Alternatives Considered**:
+- **Strict mode**: Too demanding for existing codebase, would require extensive refactoring
+- **Off mode**: No type checking, loses valuable static analysis benefits
+- **Standard mode**: Basic provides better balance for this project
+
+**References**:
+- Pyright documentation: https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+
+---
+
 ## Open Questions (if any)
 
 **None** - All questions resolved through `/clarify` workflow + user insight on baseline testing.

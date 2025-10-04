@@ -65,6 +65,35 @@ max-complexity = 10                   # Complexity threshold
 
 ---
 
+## Entity 1a: Pyright Configuration
+
+**Location**: `pyproject.toml` → `[tool.pyright]` section
+
+**Purpose**: Defines type checking mode for Python code
+
+**Schema**:
+```toml
+[tool.pyright]
+# Type checking mode
+typeCheckingMode = "basic"            # basic, standard, or strict
+# Python version target
+pythonVersion = "3.11"                # Python version
+```
+
+**Attributes**:
+- `typeCheckingMode`: String (enum: basic, standard, strict)
+- `pythonVersion`: String (e.g., "3.11", "3.12")
+
+**Validation Rules**:
+- `typeCheckingMode` must be "basic" (realistic for current codebase)
+- `pythonVersion` must match project's `requires-python` in pyproject.toml
+
+**Relationships**:
+- Referenced by pre-commit hooks (pyright uses this config)
+- Referenced by CI/CD workflow (same config for consistency)
+
+---
+
 ## Entity 2: Pre-commit Configuration
 
 **Location**: `.pre-commit-config.yaml` at repository root

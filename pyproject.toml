@@ -116,12 +116,10 @@ convention = "google"
 max-complexity = 10
 
 [tool.pyright]
-# Type checking mode - strict enforces comprehensive type safety
-typeCheckingMode = "strict"
+# Type checking mode - basic provides essential type checking without being overly strict
+typeCheckingMode = "basic"
 # Python version target - must match project requirements
 pythonVersion = "3.11"
-# Unknown type warnings - warn instead of error for gradual typing adoption
-reportMissingTypeStubs = "warning"
-reportUnknownMemberType = "warning"
-reportUnknownArgumentType = "warning"
-reportUnknownVariableType = "warning" 
+# Virtual environment configuration
+venvPath = "."
+venv = ".venv" 

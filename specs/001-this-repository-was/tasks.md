@@ -114,13 +114,9 @@
 
 - [x] **T008a [P]** Configure pyright in pyproject.toml
   - Add `[tool.pyright]` section to existing `pyproject.toml`
-  - Set `typeCheckingMode = "strict"`
+  - Set `typeCheckingMode = "basic"`
   - Set `pythonVersion = "3.11"`
-  - Set `reportMissingTypeStubs = "warning"`
-  - Set `reportUnknownMemberType = "warning"`
-  - Set `reportUnknownArgumentType = "warning"`
-  - Set `reportUnknownVariableType = "warning"`
-  - Add inline comments explaining strict mode settings per FR-018, FR-019
+  - Add inline comments explaining basic mode settings per FR-018, FR-019
 
 - [x] **T009 [P]** Create pre-commit configuration in `.pre-commit-config.yaml`
   - Add ruff-pre-commit repo with specific pinned version (e.g., `v0.1.9`, NOT `latest` or branch refs) to ensure local/CI consistency per edge case spec.md:L89
@@ -168,9 +164,8 @@
   - Assert `pyproject.toml` exists
   - Assert valid TOML syntax
   - Assert `[tool.pyright]` section exists
-  - Assert `typeCheckingMode = "strict"`
+  - Assert `typeCheckingMode = "basic"`
   - Assert `pythonVersion = "3.11"`
-  - Assert warning-level settings for unknown types configured
 
 - [x] **T013 [P]** Contract test for pre-commit config in `tests/contract/test_precommit_config.py`
   - Assert `.pre-commit-config.yaml` exists
@@ -313,8 +308,8 @@
   - Add "Table of Contents" section
   - Add "Setup Instructions" with one-command setup
   - Add "Development Workflow" with commit process
-  - Add "Coding Standards" explaining Ruff rules and pyright strict mode
-  - Add "Type Checking" section explaining pyright usage and strict mode requirements
+  - Add "Coding Standards" explaining Ruff rules and pyright basic mode
+  - Add "Type Checking" section explaining pyright usage and basic mode requirements
   - Add "Manual AI Agent Usage" with example prompts for copying errors
   - Add "Claude Auto-Fix Usage" explaining `./scripts/claude-fix.sh` command
   - Add "Troubleshooting" for common issues including type checking errors
