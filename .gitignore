@@ -146,6 +146,9 @@ dmypy.json
 *.pt
 *.out
 *.ckpt
+checkpoints/.locks
+checkpoints/models*
+# checkpoints/upload_checkpoints.sh
 
 # Lightning-Hydra-Template
 configs/local/default.yaml

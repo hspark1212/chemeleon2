@@ -1,0 +1,41 @@
+# Model Checkpoint Configuration
+#
+# This file defines metadata for model checkpoints stored on Hugging Face Hub.
+# Checkpoints are automatically downloaded when running tests locally.
+#
+# To upload new checkpoints: ./scripts/upload_checkpoints.sh
+# To calculate checksums: sha256sum ckpts/**/*.ckpt
+
+checkpoints:
+  # VAE Models
+  mp_20_vae:
+    filename: dng_m4owq4i5_v0.ckpt
+    hf_path: mp_20/vae/dng_m4owq4i5_v0.ckpt
+    sha256: b3808a0ce2d5425797df358de854716d38ec7e32c9183a5931ef8109029fd9e4
+    description: "VAE model trained on MP-20 dataset"
+
+  alex_mp_20_vae:
+    filename: dng_j1jgz9t0_v1.ckpt
+    hf_path: alex_mp_20/vae/dng_j1jgz9t0_v1.ckpt
+    sha256: 6c1b6f93777ad261f27fbaf9170ba1c2e125da7865e7f2959805d35bbfe6d9ee
+    description: "VAE model trained on Alex MP-20 dataset"
+
+  # LDM Models
+  mp_20_ldm:
+    filename: ldm_rl_dng_xxq3a0mn.ckpt
+    hf_path: mp_20/ldm/ldm_rl_dng_xxq3a0mn.ckpt
+    sha256: ea30e0805f20991b48a18bc842c9a6b06278c91fb29c67985b0497704aef8e51
+    description: "LDM model trained on MP-20 dataset with RL fine-tuning"
+
+  alex_mp_20_ldm:
+    filename: ldm_rl_dng_tuor5vgd.ckpt
+    hf_path: alex_mp_20/ldm/ldm_rl_dng_tuor5vgd.ckpt
+    sha256: 5bbab2375b0e53e5592a9efccaf7178a75ea8a53f3736add38d54e5e32c3ce16
+    description: "LDM model trained on Alex MP-20 dataset with RL fine-tuning"
+
+# Configuration
+config:
+  hf_repo: "hspark1212/chemeleon2-checkpoints"
+  cache_dir: "./checkpoints"
+  retry_attempts: 3
+  retry_delay: 2  # seconds

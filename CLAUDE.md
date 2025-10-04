@@ -54,6 +54,7 @@ data/               # Dataset directories (mp-20, mp-120, etc.)
 - pymatgen ≥2025.6.14
 - pytest ≥7.0
 - wandb ≥0.21.3
+- huggingface_hub ≥0.20.0 (for checkpoint downloads)
 
 ## Commands
 ```bash
@@ -73,6 +74,12 @@ pytest tests/ -m baseline        # Run baseline tests
 pytest tests/ -m unit            # Run unit tests
 ruff check .                     # Run linter
 ```
+
+## Checkpoints
+Model checkpoints auto-download from `hspark1212/chemeleon2-checkpoints` (HF Hub):
+- First run: Downloads ~1.7GB (4 checkpoints: VAE/LDM for mp_20 & alex_mp_20)
+- Cached in `./checkpoints/` with SHA256 verification
+- Auto-retry on failure (3 attempts, 2s delay)
 
 ## Code Style
 Python 3.11+: Follow standard conventions

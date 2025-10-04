@@ -43,6 +43,6 @@ jobs:
         run: pyright
         continue-on-error: true # TODO: Change to false once type issues are resolved
 
-      # Run full test suite (including baseline tests)
+      # Run test suite (checkpoints auto-download from HF Hub)
       - name: Run tests
         run: pytest
