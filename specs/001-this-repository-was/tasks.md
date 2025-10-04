@@ -320,6 +320,45 @@
 
 ---
 
+## Phase 3.9: Pyright Type Error Resolution
+
+⚠️ **NOTE**: Pyright was temporarily made non-blocking in T022 due to pre-existing type errors. This phase resolves all type errors and re-enables strict pyright checking.
+
+- [ ] **T028** Fix pyright type errors in ldm_module
+  - Fix type errors in `src/ldm_module/denoisers/dit.py` (10 errors)
+  - Fix type errors in `src/ldm_module/diffusion/gaussian_diffusion.py` (7 errors)
+  - Fix type errors in `src/ldm_module/diffusion/timestep_sampler.py` (9 errors)
+  - Verify fixes with: `pyright src/ldm_module/`
+  - **Dependency**: Requires T022 (CI passing with non-blocking pyright)
+
+- [ ] **T029** Fix pyright type errors in rl_module
+  - Fix type errors in `src/rl_module/reward.py` (2 errors)
+  - Verify fixes with: `pyright src/rl_module/`
+  - **Dependency**: Requires T022 (CI passing with non-blocking pyright)
+
+- [ ] **T030** Re-enable pyright in pre-commit hooks
+  - Uncomment pyright hook in `.pre-commit-config.yaml`
+  - Remove "TEMPORARILY DISABLED" comment
+  - Update comment to reference completed type error fixes
+  - Test hook works: make intentional type error and verify it's caught
+  - **Dependency**: Requires T028, T029 (all type errors fixed)
+
+- [ ] **T031** Make pyright blocking in CI workflow
+  - Remove `continue-on-error: true` from `.github/workflows/ci.yml`
+  - Remove comment about "non-blocking for now"
+  - Update comment to indicate pyright errors will fail CI
+  - Run full CI to verify all checks pass
+  - **Dependency**: Requires T030 (pre-commit hook working)
+
+- [ ] **T032** Verify pyright integration is fully enabled
+  - Run: `pytest tests/contract/ -v` to verify all contract tests pass
+  - Verify pre-commit hook catches type errors
+  - Verify CI fails on intentional type error (test in branch)
+  - Document that pyright is now fully enforced
+  - **Dependency**: Requires T031 (CI blocking enabled)
+
+---
+
 ## Dependencies Graph
 
 ```
@@ -362,6 +401,14 @@ T023, T007 → T026 (wrapper script)
 
 Documentation:
 T020, T026 → T027 (CONTRIBUTING.md)
+
+Pyright Error Resolution Phase:
+T022 → T028 (fix ldm_module types) ┐
+T022 → T029 (fix rl_module types)  ├─ [Parallel - different modules]
+                                   │
+T028, T029 → T030 (re-enable pre-commit pyright)
+T030 → T031 (make CI pyright blocking)
+T031 → T032 (verify full integration)
 ```
 
 ---
@@ -410,6 +457,13 @@ pytest tests/contract/ -n auto
 # Task 2: "Create Claude agent configuration in .claude/hooks/pre-commit-autofix.md"
 ```
 
+### Example 5: Pyright Type Error Fixes (T028-T029)
+```bash
+# Type error fixes in different modules can run in parallel - different files
+# Task 1: "Fix pyright type errors in ldm_module"
+# Task 2: "Fix pyright type errors in rl_module"
+```
+
 ---
 
 ## Critical Success Gates
@@ -451,9 +505,10 @@ pytest tests/contract/ -n auto
 - [x] Critical requirement met: Baseline tests BEFORE formatting changes (T007 gates T008-T014)
 - [x] Test-First Development: T003-T007 before T016-T019
 - [x] Claude Auto-Fix integration added: T023-T027 for automatic Ruff and pyright violation fixing
+- [x] Pyright error resolution phase added: T028-T032 for fixing type errors and re-enabling strict checking
 
 ---
 
 **Tasks Complete** ✅
-Total: 29 tasks (23 original + 4 Claude Auto-Fix + 2 pyright additions + 1 updated documentation)
+Total: 34 tasks (23 original + 4 Claude Auto-Fix + 2 pyright config additions + 5 pyright error resolution)
 Ready for Phase 3 execution. Begin with T001.
