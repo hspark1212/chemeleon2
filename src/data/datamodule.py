@@ -1,11 +1,19 @@
-from torch_geometric.loader import DataLoader
+"""Lightning DataModule for crystal structure datasets.
+
+This module provides a LightningDataModule wrapper for loading and batching
+crystal structure data with support for Materials Project datasets.
+"""
+
 from lightning import LightningDataModule
+from torch_geometric.loader import DataLoader
 
 from src.data.components.mp_dataset import MPDataset
 from src.data.schema import CrystalBatch
 
 
 class DataModule(LightningDataModule):
+    """PyTorch Lightning DataModule for crystal structure datasets."""
+
     def __init__(
         self,
         data_dir: str,
@@ -15,7 +23,7 @@ class DataModule(LightningDataModule):
         mace_features: bool = False,
         num_workers: int = 0,
         pin_memory: bool = True,
-    ):
+    ) -> None:
         super().__init__()
         # Configs for dataset
         self.dataset_type = dataset_type
@@ -39,7 +47,7 @@ class DataModule(LightningDataModule):
         """Return the dataset class based on the dataset type."""
         return MPDataset
 
-    def setup(self, stage: str | None = None):
+    def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
             self.train_dataset = self.dataset_cls(
                 root=self.data_dir,

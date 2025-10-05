@@ -1,9 +1,10 @@
-import hydra
-from omegaconf import DictConfig, OmegaConf
+"""Training script for property predictor model."""
 
+import hydra
 import lightning as L
 from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger, WandbLogger
+from omegaconf import DictConfig, OmegaConf
 
 from src.utils.instantiators import instantiate_callbacks, instantiate_loggers
 
@@ -11,7 +12,7 @@ from src.utils.instantiators import instantiate_callbacks, instantiate_loggers
 @hydra.main(
     version_base="1.3", config_path="../configs", config_name="train_predictor.yaml"
 )
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     print(f"Running with config: {OmegaConf.to_yaml(cfg)}")
 
     # Set up random seed
@@ -31,8 +32,9 @@ def main(cfg: DictConfig):
     logger: list[Logger] = instantiate_loggers(cfg.get("logger"))
     for lg in logger:
         if isinstance(lg, WandbLogger):
-            full_cfg = OmegaConf.to_container(cfg, resolve=True)
-            lg.log_hyperparams(full_cfg)
+            full_cfg_container = OmegaConf.to_container(cfg, resolve=True)
+            assert isinstance(full_cfg_container, dict)
+            lg.log_hyperparams(full_cfg_container)  # type: ignore[arg-type]
 
     # Set up Trainer
     trainer: Trainer = hydra.utils.instantiate(

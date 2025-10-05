@@ -1,20 +1,22 @@
+"""Reward functions for reinforcement learning fine-tuning."""
+
 import enum
 from collections import defaultdict
 from functools import partial
 
-import numpy as np
-from pymatgen.core import Composition
 import amd
+import numpy as np
 import torch
+from pymatgen.core import Composition
 
 from src.data.schema import CrystalBatch
-from src.utils.metrics import Metrics, structures_to_amd
 from src.utils.featurizer import featurize
+from src.utils.metrics import Metrics, structures_to_amd
 from src.vae_module.predictor_module import PredictorModule
 
 
 class RewardType(enum.Enum):
-    """Enum for different reward types"""
+    """Enum for different reward types."""
 
     DNG = "dng"
     CSP = "csp"
@@ -23,7 +25,7 @@ class RewardType(enum.Enum):
 
 
 class ReinforceReward(torch.nn.Module):
-    """Reward function for reinforcement learning"""
+    """Reward function for reinforcement learning."""
 
     def __init__(
         self,
@@ -32,7 +34,7 @@ class ReinforceReward(torch.nn.Module):
         eps: float = 1e-4,
         reference_dataset: str = "mp-20",
         **kwargs,
-    ):
+    ) -> None:
         super().__init__()
         print(f"Starting setup for reward type: {reward_type}")
         self.reward_type = RewardType(reward_type)
@@ -84,7 +86,7 @@ class ReinforceReward(torch.nn.Module):
         print("Reward function setup complete.")
 
     def forward(
-        self, batch_gen: CrystalBatch, device: torch.device = None
+        self, batch_gen: CrystalBatch, device: torch.device | None = None
     ) -> torch.Tensor:
         # Calculate reward
         rewards = self.reward_fn(batch_gen=batch_gen)
@@ -156,6 +158,7 @@ def reward_dng(batch_gen: CrystalBatch, m: Metrics, **kwargs) -> torch.Tensor:
     # # 3. Structure diversity
     gen_features = featurize(gen_structures)
     gen_structure_features = gen_features["structure_features"]
+    assert m._reference_structure_features is not None
     ref_structure_features = m._reference_structure_features.to(
         gen_structure_features.device
     )
@@ -169,6 +172,7 @@ def reward_dng(batch_gen: CrystalBatch, m: Metrics, **kwargs) -> torch.Tensor:
 
     # 4. Composition diversity
     gen_composition_features = gen_features["composition_features"]
+    assert m._reference_composition_features is not None
     ref_composition_features = m._reference_composition_features.to(
         gen_composition_features.device
     )
@@ -211,13 +215,15 @@ def reward_csp(batch_gen: CrystalBatch, m: Metrics) -> torch.Tensor:
 
     # 3. Composition matching
     gen_compositions = [st.reduced_formula for st in gen_structures]
-    ref_compositions = [
-        Composition(y).reduced_formula for y in batch_gen.y["composition"]
-    ]
+    y = getattr(batch_gen, "y", None)
+    assert y is not None and "composition" in y
+    ref_compositions = [Composition(comp).reduced_formula for comp in y["composition"]]
     r_composition_matching = torch.tensor(
         [
             gen_comp == ref_comp
-            for gen_comp, ref_comp in zip(gen_compositions, ref_compositions)
+            for gen_comp, ref_comp in zip(
+                gen_compositions, ref_compositions, strict=False
+            )
         ]
     )
 
@@ -228,7 +234,7 @@ def reward_csp(batch_gen: CrystalBatch, m: Metrics) -> torch.Tensor:
 
 
 def custom_reward(batch_gen: CrystalBatch) -> torch.Tensor:
-    """Calculate custom reward for a batch of structures"""
+    """Calculate custom reward for a batch of structures."""
     gen_structures = batch_gen.to_structure()
     # Placeholder implementation - replace with actual custom reward calculation
     return torch.ones(len(gen_structures), dtype=torch.float32)
@@ -246,6 +252,7 @@ def reward_bandgap(
 
     # For diversity reward (This part is optional, can be removed if not needed)
     m = Metrics(metrics=["composition_diversity"])
+    assert m._reference_composition_features is not None
     ref_composition_features = m._reference_composition_features.to(device)
     gen_structures = batch_gen.to_structure()
     gen_features = featurize(gen_structures)
@@ -279,7 +286,7 @@ def normalize(x: torch.Tensor, eps: float = 1e-4) -> torch.Tensor:
 
 
 def mmd_reward(z_gen, z_ref):
-    """Training Diffusion Models Towards Diverse Image Generation with Reinforcement Learning"""
+    """Training Diffusion Models Towards Diverse Image Generation with Reinforcement Learning."""
 
     def poly_k(z, y, deg=3):
         d = z.size(-1)

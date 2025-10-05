@@ -1,6 +1,5 @@
-"""
-adapted from
-https://github.com/facebookresearch/all-atom-diffusion-transformer
+"""adapted from
+https://github.com/facebookresearch/all-atom-diffusion-transformer.
 """
 
 import math
@@ -30,7 +29,7 @@ def get_index_embedding(indices, emb_dim, max_len=2048):
     pos_embedding_cos = torch.cos(
         indices[..., None] * math.pi / (max_len ** (2 * K[None] / emb_dim))
     ).to(indices.device)
-    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], axis=-1)
+    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], dim=-1)
     return pos_embedding
 
 
@@ -52,7 +51,7 @@ class TransformerDecoder(nn.Module):
         norm_first: bool = True,
         bias: bool = True,
         num_layers: int = 6,
-    ):
+    ) -> None:
         super().__init__()
 
         self.max_num_elements = max_num_elements
@@ -90,13 +89,12 @@ class TransformerDecoder(nn.Module):
     def forward(
         self, encoded_batch: dict[str, torch.Tensor]
     ) -> dict[str, torch.Tensor]:
-        """
-        Args:
-            encoded_batch: Dict with the following attributes:
-                x (torch.Tensor): Encoded batch of atomic environments
-                num_atoms (torch.Tensor): Number of atoms in each molecular environment
-                batch (torch.Tensor): Batch index for each atom
-                token_idx (torch.Tensor): Token index for each atom
+        """Args:
+        encoded_batch: Dict with the following attributes:
+            x (torch.Tensor): Encoded batch of atomic environments
+            num_atoms (torch.Tensor): Number of atoms in each molecular environment
+            batch (torch.Tensor): Batch index for each atom
+            token_idx (torch.Tensor): Token index for each atom.
         """
         x = encoded_batch["x"]
 
@@ -125,10 +123,11 @@ class TransformerDecoder(nn.Module):
         # Fractional coordinates prediction head
         frac_coords_out = self.frac_coords_head(x)
 
-        return {
+        result = {
             "atom_types": atom_types_out,
             "lattices": lattices_out,
             "lengths": lattices_out[:, :3],
             "angles": lattices_out[:, 3:],
             "frac_coords": frac_coords_out,
         }
+        return result

@@ -1,8 +1,13 @@
-from ase import Atoms
-from pymatgen.core import Structure, Lattice
+"""Utility functions for crystal structure dataset conversions.
+
+This module provides conversion functions between pymatgen Structure objects,
+PyTorch Geometric Data objects, and ASE Atoms objects.
+"""
 
 import torch
-from torch_geometric.data import Data, Batch
+from ase import Atoms
+from pymatgen.core import Lattice, Structure
+from torch_geometric.data import Batch, Data
 
 
 def pmg_structure_to_pyg_data(pmg_structure: Structure, **kwargs) -> Data:
@@ -18,7 +23,7 @@ def pmg_structure_to_pyg_data(pmg_structure: Structure, **kwargs) -> Data:
         frac_coords=torch.as_tensor(pmg_structure.frac_coords, dtype=torch.float),
         cart_coords=torch.as_tensor(pmg_structure.cart_coords, dtype=torch.float),
         lattices=torch.as_tensor(
-            pmg_structure.lattice.matrix, dtype=torch.float
+            pmg_structure.lattice.matrix.copy(), dtype=torch.float
         ).unsqueeze(0),
         num_atoms=torch.as_tensor([len(pmg_structure)], dtype=torch.long),
         lengths=lengths,

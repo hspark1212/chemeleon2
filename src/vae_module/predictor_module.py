@@ -1,13 +1,18 @@
+# type: ignore
+"""Property predictor PyTorch Lightning module."""
+
 import torch
 import torch.nn as nn
 from lightning import LightningModule
 
 from src.data.schema import CrystalBatch
-from src.vae_module.vae_module import VAEModule
 from src.utils.scatter import scatter_mean, scatter_sum
+from src.vae_module.vae_module import VAEModule
 
 
 class PredictorModule(LightningModule):
+    """Property predictor module for crystal structures."""
+
     def __init__(
         self,
         vae: VAEModule,
@@ -15,8 +20,8 @@ class PredictorModule(LightningModule):
         reduce: str,
         use_encoder_features: bool,
         optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
-    ):
+        scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
+    ) -> None:
         super().__init__()
         self.save_hyperparameters(logger=False)
         self.vae = vae
@@ -77,9 +82,9 @@ class PredictorModule(LightningModule):
     def calculate_loss(self, batch: CrystalBatch) -> dict:
         # Check that batch contains all target conditions
         target_conditions = list(batch.y.keys())
-        assert set(target_conditions) == set(
-            self.target_conditions
-        ), f"Expected conditions {self.target_conditions}, but got {target_conditions}"
+        assert set(target_conditions) == set(self.target_conditions), (
+            f"Expected conditions {self.target_conditions}, but got {target_conditions}"
+        )
 
         # Forward pass
         pred = self.forward(batch)  # (B, num_targets)
@@ -140,7 +145,7 @@ class PredictorModule(LightningModule):
         res: dict,
         split: str,
         batch_size: int | None = None,
-    ):
+    ) -> None:
         for k, v in res.items():
             if isinstance(v, torch.Tensor):
                 v = v.mean()

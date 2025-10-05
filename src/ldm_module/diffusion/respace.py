@@ -1,3 +1,9 @@
+"""Respaced diffusion for faster sampling with fewer timesteps.
+
+This module implements SpacedDiffusion, which allows skipping timesteps in the
+base diffusion process for faster sampling with DDIM or other accelerated samplers.
+"""
+
 # Adatped from https://github.com/facebookresearch/DiT
 # Modified from OpenAI's diffusion repos
 #     GLIDE: https://github.com/openai/glide-text2im/blob/main/glide_text2im/gaussian_diffusion.py
@@ -11,8 +17,7 @@ from .gaussian_diffusion import GaussianDiffusion
 
 
 def space_timesteps(num_timesteps, section_counts):
-    """
-    Create a list of timesteps to use from an original diffusion process,
+    """Create a list of timesteps to use from an original diffusion process,
     given the number of timesteps we want to take from equally-sized portions
     of the original process.
     For example, if there's 300 timesteps and the section counts are [10,15,20]
@@ -64,14 +69,13 @@ def space_timesteps(num_timesteps, section_counts):
 
 
 class SpacedDiffusion(GaussianDiffusion):
-    """
-    A diffusion process which can skip steps in a base diffusion process.
+    """A diffusion process which can skip steps in a base diffusion process.
     :param use_timesteps: a collection (sequence or set) of timesteps from the
                           original diffusion process to retain.
     :param kwargs: the kwargs to create the base diffusion process.
     """
 
-    def __init__(self, use_timesteps, **kwargs):
+    def __init__(self, use_timesteps, **kwargs) -> None:
         self.use_timesteps = set(use_timesteps)
         self.timestep_map = []
         self.original_num_steps = len(kwargs["betas"])
@@ -87,14 +91,10 @@ class SpacedDiffusion(GaussianDiffusion):
         kwargs["betas"] = np.array(new_betas)
         super().__init__(**kwargs)
 
-    def p_mean_variance(
-        self, model, *args, **kwargs
-    ):  # pylint: disable=signature-differs
+    def p_mean_variance(self, model, *args, **kwargs):  # pylint: disable=signature-differs
         return super().p_mean_variance(self._wrap_model(model), *args, **kwargs)
 
-    def training_losses(
-        self, model, *args, **kwargs
-    ):  # pylint: disable=signature-differs
+    def training_losses(self, model, *args, **kwargs):  # pylint: disable=signature-differs
         return super().training_losses(self._wrap_model(model), *args, **kwargs)
 
     def condition_mean(self, cond_fn, *args, **kwargs):
@@ -114,7 +114,7 @@ class SpacedDiffusion(GaussianDiffusion):
 
 
 class _WrappedModel:
-    def __init__(self, model, timestep_map, original_num_steps):
+    def __init__(self, model, timestep_map, original_num_steps) -> None:
         self.model = model
         self.timestep_map = timestep_map
         # self.rescale_timesteps = rescale_timesteps

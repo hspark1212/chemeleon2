@@ -1,18 +1,21 @@
-# https://github.com/snu-micc/Synthesizability-PU-CGCNN
-import os
-import json
+"""Crystal Lattice score calculation utilities.
+
+Adapted from https://github.com/snu-micc/Synthesizability-PU-CGCNN
+"""
+
 import argparse
+import json
+import os
 from pathlib import Path
-import requests
 
-from tqdm import tqdm
 import numpy as np
-from pymatgen.core import Structure
-
+import requests
 import torch
 import torch.nn as nn
+from pymatgen.core import Structure
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 BENCHMARK_DIR = Path(__file__).resolve().parent.parent.parent / "benchmarks"
 CLSCORE_MODEL_DIR = BENCHMARK_DIR / "cl_score_trained_models"
@@ -23,9 +26,7 @@ num_models = 100
 
 
 def download_trained_models():
-    """
-    Download trained models for CLScore from the GitHub repository.
-    """
+    """Download trained models for CLScore from the GitHub repository."""
     if not CLSCORE_MODEL_DIR.exists():
         CLSCORE_MODEL_DIR.mkdir(parents=True, exist_ok=True)
         print(f"Created directory: {CLSCORE_MODEL_DIR}")
@@ -54,9 +55,7 @@ def download_trained_models():
 
 
 def download_atom_init_file():
-    """
-    Download the atom initialization file for CLScore.
-    """
+    """Download the atom initialization file for CLScore."""
     if not os.path.exists(ATOM_INIT_FILE):
         print(f"Downloading atom initialization file to {ATOM_INIT_FILE}...")
         url = "https://raw.githubusercontent.com/txie-93/cgcnn/refs/heads/master/data/sample-regression/atom_init.json"
@@ -75,6 +74,8 @@ def download_atom_init_file():
 
 
 class GaussianDistance:
+    """Gaussian distance expansion for structure features."""
+
     def __init__(self, dmin, dmax, step, var=None):
         assert dmin < dmax
         assert dmax - dmin > step
@@ -87,7 +88,9 @@ class GaussianDistance:
         return np.exp(-((distances[..., np.newaxis] - self.filter) ** 2) / self.var**2)
 
 
-class AtomInitializer(object):
+class AtomInitializer:
+    """Base class for atomic feature initialization."""
+
     def __init__(self, atom_types):
         self.atom_types = set(atom_types)
         self._embedding = {}
@@ -108,7 +111,7 @@ class AtomInitializer(object):
         return self._embedding
 
     def decode(self, idx):
-        if not hasattr(self, "_decodedict"):
+        if self._decodedict is None:
             self._decodedict = {
                 idx: atom_type for atom_type, idx in self._embedding.items()
             }
@@ -116,6 +119,8 @@ class AtomInitializer(object):
 
 
 class AtomCustomJSONInitializer(AtomInitializer):
+    """Atomic feature initializer from JSON file."""
+
     def __init__(self, elem_embedding_file):
         with open(elem_embedding_file) as f:
             elem_embedding = json.load(f)
@@ -134,7 +139,7 @@ def create_crystal_graph(
     gdf: GaussianDistance,
 ):
     atom_fea = np.vstack(
-        [ari.get_atom_fea(structure[j].specie.number) for j in range(len(structure))]
+        [ari.get_atom_fea(structure[j].specie.number) for j in range(len(structure))]  # type: ignore[union-attr]
     )
     atom_fea = torch.Tensor(atom_fea)
     all_nbrs = structure.get_all_neighbors(radius, include_index=True)
@@ -182,6 +187,8 @@ def collate_pool(dataset_list):
 
 
 class ConvLayer(nn.Module):
+    """Convolutional layer for crystal graph neural network."""
+
     def __init__(self, atom_fea_len, nbr_fea_len):
         super(ConvLayer, self).__init__()
         self.atom_fea_len = atom_fea_len
@@ -221,6 +228,8 @@ class ConvLayer(nn.Module):
 
 
 class CrystalGraphConvNet(nn.Module):
+    """Crystal Graph Convolutional Neural Network for property prediction."""
+
     def __init__(
         self,
         orig_atom_fea_len,
@@ -267,7 +276,7 @@ class CrystalGraphConvNet(nn.Module):
         if self.classification:
             crys_fea = self.dropout(crys_fea)
         if hasattr(self, "fcs") and hasattr(self, "softpluses"):
-            for fc, softplus in zip(self.fcs, self.softpluses):
+            for fc, softplus in zip(self.fcs, self.softpluses, strict=False):
                 crys_fea = softplus(fc(crys_fea))
 
         self.final_fea = crys_fea
@@ -340,7 +349,10 @@ def compute_clscore(structures: list[Structure], batch_size=100, use_cuda=True):
         )
     ]
     test_loader = DataLoader(
-        data_list, batch_size=batch_size, shuffle=False, collate_fn=collate_pool
+        data_list,  # type: ignore[arg-type]
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_pool,  # type: ignore[arg-type]
     )
     total_results = []
 
@@ -350,9 +362,9 @@ def compute_clscore(structures: list[Structure], batch_size=100, use_cuda=True):
         raise FileNotFoundError(f"Model directory not found: {model_dir}")
     # Check the number of model files
     model_files = list(model_dir.glob("checkpoint_bag_*.pth.tar"))
-    assert (
-        len(model_files) == num_models
-    ), f"Expected {num_models} model files, found {len(model_files)}."
+    assert len(model_files) == num_models, (
+        f"Expected {num_models} model files, found {len(model_files)}."
+    )
 
     for i in tqdm(range(1, num_models + 1)):
         model_path = Path(model_dir) / f"checkpoint_bag_{i}.pth.tar"

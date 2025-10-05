@@ -1,3 +1,9 @@
+"""Diffusion Transformer (DiT) denoiser architecture.
+
+This module implements the DiT architecture for denoising in the latent diffusion model,
+adapted from Meta's DiT paper with support for variable-length sequences and masking.
+"""
+
 # Adapted from:
 # https://github.com/facebookresearch/DiT/models.py
 # https://github.com/facebookresearch/all-atom-diffusion-transformer/src/models/denoisers/dit.py
@@ -14,6 +20,7 @@
 # --------------------------------------------------------
 
 import math
+from collections.abc import Callable
 
 import torch
 import torch.nn as nn
@@ -31,7 +38,7 @@ def modulate(x, shift, scale):
 class TimestepEmbedder(nn.Module):
     """Embeds scalar timesteps into vector representations."""
 
-    def __init__(self, hidden_dim, frequency_embedding_dim=256):
+    def __init__(self, hidden_dim, frequency_embedding_dim=256) -> None:
         super().__init__()
         self.mlp = nn.Sequential(
             nn.Linear(frequency_embedding_dim, hidden_dim, bias=True),
@@ -71,7 +78,7 @@ def get_pos_embedding(indices, emb_dim, max_len=2048):
     pos_embedding_cos = torch.cos(
         indices[..., None] * math.pi / (max_len ** (2 * K[None] / emb_dim))
     ).to(indices.device)
-    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], axis=-1)
+    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], dim=-1)
     return pos_embedding
 
 
@@ -88,11 +95,11 @@ class Mlp(nn.Module):
         in_features,
         hidden_features=None,
         out_features=None,
-        act_layer=nn.GELU,
+        act_layer: Callable[[], nn.Module] = nn.GELU,
         norm_layer=None,
         bias=True,
         drop=0.0,
-    ):
+    ) -> None:
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -119,7 +126,7 @@ class Mlp(nn.Module):
 class DiTBlock(nn.Module):
     """A DiT block with adaptive layer norm zero (adaLN-Zero) conditioning."""
 
-    def __init__(self, hidden_dim, num_heads, mlp_ratio=4.0):
+    def __init__(self, hidden_dim, num_heads, mlp_ratio=4.0) -> None:
         super().__init__()
         self.norm1 = nn.LayerNorm(hidden_dim, elementwise_affine=False, eps=1e-6)
         self.attn = nn.MultiheadAttention(
@@ -127,11 +134,11 @@ class DiTBlock(nn.Module):
         )
         self.norm2 = nn.LayerNorm(hidden_dim, elementwise_affine=False, eps=1e-6)
         mlp_hidden_dim = int(hidden_dim * mlp_ratio)
-        approx_gelu = lambda: nn.GELU(approximate="tanh")
+
         self.mlp = Mlp(
             in_features=hidden_dim,
             hidden_features=mlp_hidden_dim,
-            act_layer=approx_gelu,
+            act_layer=lambda: nn.GELU(approximate="tanh"),
             drop=0,
         )
         self.adaLN_modulation = nn.Sequential(
@@ -157,7 +164,7 @@ class DiTBlock(nn.Module):
 class FinalLayer(nn.Module):
     """The final layer of DiT."""
 
-    def __init__(self, hidden_dim, out_dim):
+    def __init__(self, hidden_dim, out_dim) -> None:
         super().__init__()
         self.norm_final = nn.LayerNorm(hidden_dim, elementwise_affine=False, eps=1e-6)
         self.linear = nn.Linear(hidden_dim, out_dim, bias=True)
@@ -184,7 +191,7 @@ class DiT(nn.Module):
         num_heads=6,
         mlp_ratio=4.0,
         learn_sigma=True,
-    ):
+    ) -> None:
         super().__init__()
         self.learn_sigma = learn_sigma
         self.latent_dim = latent_dim
@@ -206,9 +213,9 @@ class DiT(nn.Module):
         )
         self.initialize_weights()
 
-    def initialize_weights(self):
+    def initialize_weights(self) -> None:
         # Initialize transformer layers:
-        def _basic_init(module):
+        def _basic_init(module) -> None:
             if isinstance(module, nn.Linear):
                 torch.nn.init.xavier_uniform_(module.weight)
                 if module.bias is not None:
@@ -220,17 +227,17 @@ class DiT(nn.Module):
         nn.init.normal_(self.x_embedder.weight, std=0.02)
 
         # Initialize timestep embedding MLP:
-        nn.init.normal_(self.t_embedder.mlp[0].weight, std=0.02)
-        nn.init.normal_(self.t_embedder.mlp[2].weight, std=0.02)
+        nn.init.normal_(self.t_embedder.mlp[0].weight, std=0.02)  # type: ignore
+        nn.init.normal_(self.t_embedder.mlp[2].weight, std=0.02)  # type: ignore
 
         # Zero-out adaLN modulation layers in DiT blocks:
         for block in self.blocks:
-            nn.init.constant_(block.adaLN_modulation[-1].weight, 0)
-            nn.init.constant_(block.adaLN_modulation[-1].bias, 0)
+            nn.init.constant_(block.adaLN_modulation[-1].weight, 0)  # type: ignore
+            nn.init.constant_(block.adaLN_modulation[-1].bias, 0)  # type: ignore
 
         # Zero-out output layers:
-        nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)
-        nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)
+        nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)  # type: ignore
+        nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)  # type: ignore
         nn.init.constant_(self.final_layer.linear.weight, 0)
         nn.init.constant_(self.final_layer.linear.bias, 0)
 
@@ -266,7 +273,8 @@ class DiT(nn.Module):
 
     def forward_with_cfg(self, x, t, mask, y, cfg_scale):
         """Forward pass of DiT, but also batches the unconditional forward pass for classifier-free
-        guidance."""
+        guidance.
+        """
         half_x = x[: x.shape[0] // 2]
         combined_x = torch.cat([half_x, half_x], dim=0)
         model_out = self.forward(combined_x, t, mask, y)

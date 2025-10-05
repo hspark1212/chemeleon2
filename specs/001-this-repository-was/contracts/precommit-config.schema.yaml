@@ -1,0 +1,50 @@
+# Contract: Pre-commit Configuration Schema
+# Location: .pre-commit-config.yaml (repository root)
+# Purpose: Defines required structure for pre-commit hooks
+
+# REQUIRED: Repository list
+repos:
+  # REQUIRED: Ruff repository
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.x.x  # REQUIRED: Pinned version (not "latest" or branch)
+    hooks:
+      # REQUIRED: Ruff format hook (must come first)
+      - id: ruff-format
+        name: "Ruff Format Check"
+        stages: [commit]  # REQUIRED: Run on commit
+
+      # REQUIRED: Ruff lint hook (must come after format)
+      - id: ruff
+        name: "Ruff Lint"
+        args: [--fix]  # OPTIONAL: Auto-fix when possible
+        stages: [commit]
+
+  # REQUIRED: Pre-commit hooks repository (for file validation)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.x.x  # REQUIRED: Pinned version
+    hooks:
+      # REQUIRED: YAML validation
+      - id: check-yaml
+        name: "Check YAML"
+        files: \.yaml$
+
+      # REQUIRED: TOML validation
+      - id: check-toml
+        name: "Check TOML"
+        files: \.toml$
+
+      # REQUIRED: JSON validation
+      - id: check-json
+        name: "Check JSON"
+        files: \.json$
+
+# Contract Test: test_precommit_config.py
+# Validates:
+# 1. .pre-commit-config.yaml exists at repository root
+# 2. repos list exists
+# 3. ruff-pre-commit repository is present
+# 4. ruff-format hook exists and runs on commit stage
+# 5. ruff hook exists with --fix arg and runs on commit stage
+# 6. ruff-format comes before ruff in hook order
+# 7. File validation hooks (yaml, toml, json) exist
+# 8. All repository revs are pinned versions (not "latest")

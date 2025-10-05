@@ -1,0 +1,46 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+
+repos:
+  # Ruff - Python formatter and linter (combined tool)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.3 # Pinned version for consistency between local and CI
+    hooks:
+      # Ruff formatter - must run BEFORE linter
+      - id: ruff-format
+        name: "Ruff Format"
+        stages: [pre-commit]
+
+      # Ruff linter - runs after formatting
+      - id: ruff
+        name: "Ruff Lint"
+        args: [--fix] # Auto-fix violations when possible
+        stages: [pre-commit]
+
+  # Pyright - Static type checker for Python
+  # See: Decision 13 in research.md - basic mode chosen for practical type checking
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.406 # Pinned version for consistency
+    hooks:
+      - id: pyright
+        name: "Pyright Type Check"
+        stages: [pre-commit]
+
+  # Pre-commit hooks - File validation utilities
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0 # Pinned version for consistency
+    hooks:
+      # YAML file validation
+      - id: check-yaml
+        name: "Check YAML"
+        files: \.yaml$
+
+      # TOML file validation
+      - id: check-toml
+        name: "Check TOML"
+        files: \.toml$
+
+      # JSON file validation
+      - id: check-json
+        name: "Check JSON"
+        files: \.json$

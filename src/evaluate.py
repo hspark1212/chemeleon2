@@ -1,9 +1,15 @@
+"""Evaluation script for generated crystal structures.
+
+This script evaluates generated structures against reference datasets using
+various metrics including structure matching, stability, and coverage.
+"""
+
 from pathlib import Path
 
 import fire
 from monty.serialization import loadfn
-from pymatgen.core import Structure
 from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.core import Structure
 
 from src.sample import sample
 from src.utils.metrics import Metrics
@@ -14,7 +20,7 @@ from src.utils.metrics import Metrics
 #################
 def evaluate(
     structure_path: str,  # Path to the generated structures (Directory or JSON file)
-    model_path: str = None,  # Path to the trained model checkpoint
+    model_path: str | None = None,  # Path to the trained model checkpoint
     reference_dataset: str = "mp-20",  # "mp-20", "mp-all"
     phase_diagram: str = "mp-all",  # "mp-all"
     output_file: str = "benchmark/results/benchmark_results.csv",
@@ -22,8 +28,8 @@ def evaluate(
     stol: float = 0.3,
     angle_tol: float = 5.0,
     stability_threshold: float = 0.1,
-    **sample_configs: dict,
-):
+    **sample_configs,
+) -> None:
     if model_path is not None:
         print(f"Using model from {model_path} for sampling structures.")
         sample(

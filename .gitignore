@@ -146,6 +146,9 @@ dmypy.json
 *.pt
 *.out
 *.ckpt
+checkpoints/.locks
+checkpoints/models*
+# checkpoints/upload_checkpoints.sh
 
 # Lightning-Hydra-Template
 configs/local/default.yaml
@@ -173,6 +176,5 @@ ckpts/
 *.qsub.*
 
 # Claude code
-CLAUDE.md
-.claude/
-.serena/
+# CLAUDE.md
+# .claude/

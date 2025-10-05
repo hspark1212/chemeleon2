@@ -1,3 +1,9 @@
+"""Timestep sampling strategies for diffusion model training.
+
+This module provides various timestep sampling strategies including uniform sampling
+and loss-aware importance sampling to reduce training variance.
+"""
+
 # Adatped from https://github.com/facebookresearch/DiT
 # Modified from OpenAI's diffusion repos
 #     GLIDE: https://github.com/openai/glide-text2im/blob/main/glide_text2im/gaussian_diffusion.py
@@ -12,8 +18,7 @@ import torch.distributed as dist
 
 
 def create_named_schedule_sampler(name, diffusion):
-    """
-    Create a ScheduleSampler from a library of pre-defined samplers.
+    """Create a ScheduleSampler from a library of pre-defined samplers.
     :param name: the name of the sampler.
     :param diffusion: the diffusion object to sample for.
     """
@@ -26,8 +31,7 @@ def create_named_schedule_sampler(name, diffusion):
 
 
 class ScheduleSampler(ABC):
-    """
-    A distribution over timesteps in the diffusion process, intended to reduce
+    """A distribution over timesteps in the diffusion process, intended to reduce
     variance of the objective.
     By default, samplers perform unbiased importance sampling, in which the
     objective's mean is unchanged.
@@ -37,14 +41,12 @@ class ScheduleSampler(ABC):
 
     @abstractmethod
     def weights(self):
-        """
-        Get a numpy array of weights, one per diffusion step.
+        """Get a numpy array of weights, one per diffusion step.
         The weights needn't be normalized, but must be positive.
         """
 
     def sample(self, batch_size, device):
-        """
-        Importance-sample timesteps for a batch.
+        """Importance-sample timesteps for a batch.
         :param batch_size: the number of timesteps.
         :param device: the torch device to save to.
         :return: a tuple (timesteps, weights):
@@ -52,6 +54,7 @@ class ScheduleSampler(ABC):
                  - weights: a tensor of weights to scale the resulting losses.
         """
         w = self.weights()
+        assert w is not None, "weights() should not return None"
         p = w / np.sum(w)
         indices_np = np.random.choice(len(p), size=(batch_size,), p=p)
         indices = th.from_numpy(indices_np).long().to(device)
@@ -61,7 +64,9 @@ class ScheduleSampler(ABC):
 
 
 class UniformSampler(ScheduleSampler):
-    def __init__(self, diffusion):
+    """Uniform timestep sampler for diffusion training."""
+
+    def __init__(self, diffusion) -> None:
         self.diffusion = diffusion
         self._weights = np.ones([diffusion.num_timesteps])
 
@@ -70,9 +75,10 @@ class UniformSampler(ScheduleSampler):
 
 
 class LossAwareSampler(ScheduleSampler):
-    def update_with_local_losses(self, local_ts, local_losses):
-        """
-        Update the reweighting using losses from a model.
+    """Low-discrepancy timestep sampler using quasi-random sequences."""
+
+    def update_with_local_losses(self, local_ts, local_losses) -> None:
+        """Update the reweighting using losses from a model.
         Call this method from each rank with a batch of timesteps and the
         corresponding losses for each of those timesteps.
         This method will perform synchronization to make sure all of the ranks
@@ -93,20 +99,25 @@ class LossAwareSampler(ScheduleSampler):
         batch_sizes = [x.item() for x in batch_sizes]
         max_bs = max(batch_sizes)
 
-        timestep_batches = [th.zeros(max_bs).to(local_ts) for bs in batch_sizes]
-        loss_batches = [th.zeros(max_bs).to(local_losses) for bs in batch_sizes]
+        timestep_batches = [th.zeros(int(max_bs)).to(local_ts) for bs in batch_sizes]
+        loss_batches = [th.zeros(int(max_bs)).to(local_losses) for bs in batch_sizes]
         dist.all_gather(timestep_batches, local_ts)
         dist.all_gather(loss_batches, local_losses)
         timesteps = [
-            x.item() for y, bs in zip(timestep_batches, batch_sizes) for x in y[:bs]
+            x.item()
+            for y, bs in zip(timestep_batches, batch_sizes, strict=False)
+            for x in y[:bs]
         ]
-        losses = [x.item() for y, bs in zip(loss_batches, batch_sizes) for x in y[:bs]]
+        losses = [
+            x.item()
+            for y, bs in zip(loss_batches, batch_sizes, strict=False)
+            for x in y[:bs]
+        ]
         self.update_with_all_losses(timesteps, losses)
 
     @abstractmethod
     def update_with_all_losses(self, ts, losses):
-        """
-        Update the reweighting using losses from a model.
+        """Update the reweighting using losses from a model.
         Sub-classes should override this method to update the reweighting
         using losses from the model.
         This method directly updates the reweighting without synchronizing
@@ -119,14 +130,16 @@ class LossAwareSampler(ScheduleSampler):
 
 
 class LossSecondMomentResampler(LossAwareSampler):
-    def __init__(self, diffusion, history_per_term=10, uniform_prob=0.001):
+    """Loss-aware timestep sampler that prioritizes difficult timesteps."""
+
+    def __init__(self, diffusion, history_per_term=10, uniform_prob=0.001) -> None:
         self.diffusion = diffusion
         self.history_per_term = history_per_term
         self.uniform_prob = uniform_prob
         self._loss_history = np.zeros(
             [diffusion.num_timesteps, history_per_term], dtype=np.float64
         )
-        self._loss_counts = np.zeros([diffusion.num_timesteps], dtype=np.int)
+        self._loss_counts = np.zeros([diffusion.num_timesteps], dtype=np.int64)
 
     def weights(self):
         if not self._warmed_up():
@@ -137,15 +150,17 @@ class LossSecondMomentResampler(LossAwareSampler):
         weights += self.uniform_prob / len(weights)
         return weights
 
-    def update_with_all_losses(self, ts, losses):
-        for t, loss in zip(ts, losses):
-            if self._loss_counts[t] == self.history_per_term:
+    def update_with_all_losses(self, ts, losses) -> None:
+        for t, loss in zip(ts, losses, strict=False):
+            t_int = int(t)
+            if self._loss_counts[t_int] == self.history_per_term:
                 # Shift out the oldest loss term.
-                self._loss_history[t, :-1] = self._loss_history[t, 1:]
-                self._loss_history[t, -1] = loss
+                self._loss_history[t_int, :-1] = self._loss_history[t_int, 1:]
+                self._loss_history[t_int, -1] = loss
             else:
-                self._loss_history[t, self._loss_counts[t]] = loss
-                self._loss_counts[t] += 1
+                count_idx = int(self._loss_counts[t_int])
+                self._loss_history[t_int, count_idx] = loss
+                self._loss_counts[t_int] += 1
 
     def _warmed_up(self):
         return (self._loss_counts == self.history_per_term).all()

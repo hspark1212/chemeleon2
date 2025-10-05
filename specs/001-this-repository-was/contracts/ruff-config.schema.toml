@@ -1,0 +1,46 @@
+# Contract: Ruff Configuration Schema
+# Location: pyproject.toml → [tool.ruff]
+# Purpose: Defines required structure for Ruff configuration
+
+[tool.ruff]
+# REQUIRED: Python version target
+target-version = "py311"  # Must be "py311" or higher
+
+# REQUIRED: Line length (Black compatibility)
+line-length = 88  # Must be exactly 88
+
+# REQUIRED: Enabled rule sets (minimum)
+select = [
+    "F",    # Pyflakes (REQUIRED)
+    "E",    # pycodestyle errors (REQUIRED)
+    "W",    # pycodestyle warnings (REQUIRED)
+    "I",    # isort (REQUIRED)
+    "N",    # pep8-naming (REQUIRED)
+    "D",    # pydocstyle (REQUIRED)
+    "UP",   # pyupgrade (REQUIRED)
+    "ANN",  # flake8-annotations (REQUIRED)
+    "S",    # flake8-bandit (REQUIRED)
+    "B",    # flake8-bugbear (REQUIRED)
+    "C90",  # mccabe (REQUIRED)
+]
+
+# REQUIRED: Docstring convention
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Must be "google", "numpy", or "pep257"
+
+# REQUIRED: Complexity limit
+[tool.ruff.lint.mccabe]
+max-complexity = 10  # Must be <= 10 for strict quality
+
+# OPTIONAL: Ignore specific rules if justified
+# ignore = ["D100"]  # Example: ignore missing module docstrings
+
+# Contract Test: test_ruff_config.py
+# Validates:
+# 1. pyproject.toml exists
+# 2. [tool.ruff] section exists
+# 3. target-version is py311 or higher
+# 4. line-length is 88
+# 5. All required rule sets are in select list
+# 6. pydocstyle convention is set
+# 7. max-complexity is <= 10

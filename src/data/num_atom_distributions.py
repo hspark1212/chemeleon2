@@ -1,3 +1,9 @@
+"""Atom count distributions for Materials Project datasets.
+
+This module contains empirical distributions of the number of atoms per structure
+for mp-20 and mp-120 datasets, used for sampling during structure generation.
+"""
+
 NUM_ATOM_DISTRIBUTIONS = {
     "mp-20": {
         0: 0.0,

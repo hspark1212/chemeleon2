@@ -1,13 +1,13 @@
-from pathlib import Path
-from copy import deepcopy
+"""Visualization utilities for crystal structures using Plotly."""
 
-import plotly.graph_objects as go
+from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
+import plotly.graph_objects as go
 from ase.atoms import Atoms
-from ase.data.colors import jmol_colors
 from ase.data import covalent_radii
-
+from ase.data.colors import jmol_colors
 
 # update the colors and radii for the dummy atom
 jmol_colors[0] = (0.5, 0.5, 0.5)  # X
@@ -16,16 +16,16 @@ covalent_radii[0] = 0.5
 
 
 class Visualizer:
+    """Atom and bond visualization configuration for crystal structures."""
+
     def __init__(
         self,
-        atoms_list: list[Atoms] = None,
+        atoms_list: list[Atoms],
         atomic_size: float = 0.8,
         opacity: float = 1,
         resolution: int = 19,
-        layout_kwargs: dict = None,
-    ):
-        if atoms_list is None:
-            raise ValueError("atoms_list must be provided.")
+        layout_kwargs: dict | None = None,
+    ) -> None:
         self.atoms_list = atoms_list
         self.atomic_size = atomic_size
         self.opacity = opacity
@@ -77,11 +77,11 @@ class Visualizer:
         species = atoms.get_chemical_symbols()
         atomic_colors = [jmol_colors[n] for n in atoms.numbers]
         atomic_radii = [covalent_radii[n] * self.atomic_size for n in atoms.numbers]
-        x, y, z = zip(*positions)
+        x, y, z = zip(*positions, strict=False)
 
         fig = go.Figure()
         for xi, yi, zi, color, radius, sp in zip(
-            x, y, z, atomic_colors, atomic_radii, species
+            x, y, z, atomic_colors, atomic_radii, species, strict=False
         ):
             color_rgb = f"rgb{tuple(int(c * 255) for c in color)}"
             sphere_x, sphere_y, sphere_z = self._create_sphere(
@@ -105,7 +105,8 @@ class Visualizer:
             )
 
         # Dynamically create unit cell lines for the current frame
-        a, b, c = atoms.cell
+        cell_array = atoms.cell.array
+        a, b, c = cell_array[0], cell_array[1], cell_array[2]
         lines = [
             [[0, 0, 0], a],
             [[0, 0, 0], b],
@@ -122,7 +123,7 @@ class Visualizer:
         ]
         line_traces = []
         for line in lines:
-            x_values, y_values, z_values = zip(*line)
+            x_values, y_values, z_values = zip(*line, strict=False)
             line_trace = go.Scatter3d(
                 x=x_values,
                 y=y_values,
@@ -136,7 +137,7 @@ class Visualizer:
 
         # frame_layout for view_trajectory
         frame_layout = go.Layout(
-            title_text=f"Time = {frame_idx+1}",
+            title_text=f"Time = {frame_idx + 1}",
             title_x=0.5,
             title_y=0.1,
             title_xanchor="center",
@@ -207,11 +208,11 @@ class Visualizer:
 
         return self.fig
 
-    def save_html(self, save_path: str = "trajectory.html"):
-        save_path = Path(save_path)
+    def save_html(self, save_path: str = "trajectory.html") -> None:
+        save_path_obj = Path(save_path)
         if self.fig is None:
             raise ValueError(
                 "You must call view_trajectory() before saving the trajectory."
             )
-        self.fig.write_html(save_path)
-        print(f"Saved trajectory to {save_path}")
+        self.fig.write_html(save_path_obj)
+        print(f"Saved trajectory to {save_path_obj}")

@@ -1,16 +1,21 @@
+# type: ignore
+"""Reinforcement Learning PyTorch Lightning module using GRPO."""
+
 import math
-from functools import partial
 from collections import defaultdict
+from functools import partial
 
 import torch
 from lightning import LightningModule
 
 from src.data.schema import CrystalBatch
-from src.ldm_module.ldm_module import LDMModule
 from src.ldm_module.diffusion import create_diffusion
+from src.ldm_module.ldm_module import LDMModule
 
 
 class RLModule(LightningModule):
+    """Reinforcement Learning module using GRPO for fine-tuning."""
+
     def __init__(
         self,
         ldm_ckpt_path: str,
@@ -18,8 +23,9 @@ class RLModule(LightningModule):
         reward_fn: torch.nn.Module,
         sampling_configs: dict,
         optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
-    ):
+        scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
+        vae_ckpt_path: str | None = None,
+    ) -> None:
         super().__init__()
         self.save_hyperparameters(logger=False, ignore=["reward_fn"])
 
@@ -37,7 +43,9 @@ class RLModule(LightningModule):
         self.sampling_configs = sampling_configs
 
         # Load pre-trained LDM (Freeze VAE and condition embedding)
-        self.ldm = LDMModule.load_from_checkpoint(ldm_ckpt_path)
+        self.ldm = LDMModule.load_from_checkpoint(
+            ldm_ckpt_path, vae_ckpt_path=vae_ckpt_path
+        )
         print(f"Loaded LDM from {ldm_ckpt_path}")
         self.ldm.vae.eval()
         for param in self.ldm.vae.parameters():
@@ -198,7 +206,7 @@ class RLModule(LightningModule):
             res["ratio"] = ratio.mean().detach().item()
         return res
 
-    def training_step(self, batch: CrystalBatch, batch_idx: int):
+    def training_step(self, batch: CrystalBatch, batch_idx: int) -> None:
         # Create total batch (batch_size * num_group_samples)
         total_batch = batch.repeat(self.num_group_samples)
 
@@ -285,7 +293,7 @@ class RLModule(LightningModule):
         """Save the checkpoint of the diffusion_module than reinforce module."""
         return self.ldm.state_dict(*args, **kwargs)
 
-    def on_save_checkpoint(self, checkpoint):
+    def on_save_checkpoint(self, checkpoint) -> None:
         checkpoint["hyper_parameters"] = self.ldm.hparams
 
     @torch.no_grad()
@@ -294,7 +302,7 @@ class RLModule(LightningModule):
         res: dict,
         split: str,
         batch_size: int | None = None,
-    ):
+    ) -> None:
         for k, v in res.items():
             if isinstance(v, torch.Tensor):
                 v = v.mean()

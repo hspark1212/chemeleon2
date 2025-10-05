@@ -1,3 +1,5 @@
+"""Hydra instantiation utilities for callbacks and loggers."""
+
 import hydra
 from lightning import Callback
 from lightning.pytorch.loggers import Logger

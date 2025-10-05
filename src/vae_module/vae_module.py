@@ -1,7 +1,5 @@
-"""
-modified from
-https://github.com/facebookresearch/all-atom-diffusion-transformer
-"""
+# type: ignore
+"""Variational Autoencoder PyTorch Lightning module."""
 
 import numpy as np
 import torch
@@ -11,13 +9,15 @@ from lightning import LightningModule
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Structure
 
-from src.data.schema import CrystalBatch
-from src.data.dataset_util import lattice_params_to_matrix_torch
 from src.data.data_augmentation import apply_augmentation, apply_noise
+from src.data.dataset_util import lattice_params_to_matrix_torch
+from src.data.schema import CrystalBatch
 from src.utils.timeout import timeout
 
 
 class VAEModule(LightningModule):
+    """Variational Autoencoder module for crystal structure encoding."""
+
     def __init__(
         self,
         encoder: torch.nn.Module,
@@ -29,7 +29,7 @@ class VAEModule(LightningModule):
         atom_type_predict: bool,
         structure_matcher: StructureMatcher,
         optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
+        scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
     ) -> None:
         super().__init__()
 
@@ -193,7 +193,7 @@ class VAEModule(LightningModule):
         res: dict,
         split: str,
         batch_size: int | None = None,
-    ):
+    ) -> None:
         for k, v in res.items():
             self.log(
                 f"{split}/{k}",
@@ -271,7 +271,7 @@ class VAEModule(LightningModule):
         # Structure matching
         origin_structures = batch.to_structure()
         structure_matching = 0
-        for orig, rec in zip(origin_structures, rec_structures):
+        for orig, rec in zip(origin_structures, rec_structures, strict=False):
             cond = np.linalg.cond(rec.lattice.matrix)
             if cond > 1e3:
                 continue
@@ -295,7 +295,7 @@ class DiagonalGaussianDistribution:
     which are of shape (N, d) instead of (B, H, W, d) for 2D images.
     """
 
-    def __init__(self, parameters, deterministic=False):
+    def __init__(self, parameters, deterministic=False) -> None:
         self.parameters = parameters
         self.mean, self.logvar = torch.chunk(
             parameters, 2, dim=-1
@@ -336,5 +336,5 @@ class DiagonalGaussianDistribution:
     def mode(self):
         return self.mean
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"DiagonalGaussianDistribution(mean={self.mean}, logvar={self.logvar})"

@@ -1,13 +1,57 @@
-from ase import Atoms
-from pymatgen.core import Structure
+"""Custom batch schema for crystal structure data.
+
+This module defines CrystalBatch, an extension of PyTorch Geometric's Batch class
+with additional methods for crystal structure manipulation and conversion.
+"""
+
+from typing import Any
 
 import torch
+from ase import Atoms
+from pymatgen.core import Structure
 from torch import Tensor
-from torch_geometric.data import Data, Batch
+from torch_geometric.data import Batch, Data
+
 from src.data.dataset_util import batch_to_atoms_list, batch_to_structure_list
 
 
 class CrystalBatch(Batch):
+    """Custom Batch class for crystal structure data.
+
+    Attributes (dynamically added):
+        cart_coords: Cartesian coordinates of atoms
+        frac_coords: Fractional coordinates of atoms
+        lattices: Lattice vectors
+        num_atoms: Number of atoms per structure
+        lengths: Lattice lengths
+        lengths_scaled: Scaled lattice lengths
+        angles: Lattice angles
+        angles_radians: Lattice angles in radians
+        atom_types: Atom type indices
+        pos: Atom positions (alias for cart_coords/frac_coords)
+        token_idx: Token indices for atoms
+    """
+
+    # Type hints for dynamically added attributes
+    cart_coords: Tensor
+    frac_coords: Tensor
+    lattices: Tensor
+    num_atoms: Tensor
+    lengths: Tensor
+    lengths_scaled: Tensor
+    angles: Tensor
+    angles_radians: Tensor
+    atom_types: Tensor
+    pos: Tensor
+    token_idx: Tensor
+    batch: Tensor  # Batch assignment for each node
+    y: dict[str, Tensor]  # Target properties for supervised learning
+    num_nodes: int  # Number of nodes in the batch
+    mace_features: Tensor  # MACE features for Foundation Alignment loss
+    mask: Tensor  # Mask for sampling (optional, dynamically added)
+    zs: Tensor  # Latent trajectory (optional, dynamically added for RL)
+    means: Tensor  # Means trajectory (optional, dynamically added for RL)
+    stds: Tensor  # Stds trajectory (optional, dynamically added for RL)
 
     def add(self, **kwargs) -> None:
         for key, tensor in kwargs.items():
@@ -49,8 +93,8 @@ class CrystalBatch(Batch):
                 raise KeyError(f"Attribute '{key}' not found in the batch.")
             delattr(self, key)
 
-    def to(self, device: any, non_blocking: bool = False) -> "CrystalBatch":
-        return self.apply(lambda x: x.to(device, non_blocking=non_blocking))
+    def to(self, device: str | torch.device) -> "CrystalBatch":
+        return super().apply(lambda x: x.to(device))  # type: ignore
 
     def to_atoms(self, **kwargs) -> list[Atoms]:
         return batch_to_atoms_list(self, **kwargs)
@@ -64,8 +108,8 @@ class CrystalBatch(Batch):
         )
 
     @classmethod
-    def collate(cls, data_list: list[any]) -> "CrystalBatch":
-        batch = super(CrystalBatch, cls).from_data_list(data_list)
+    def collate(cls, data_list: list[Any]) -> "CrystalBatch":
+        batch = super().from_data_list(data_list)
         batch.__class__ = cls
         return batch
 

@@ -1,13 +1,15 @@
+"""Hyperparameter sweep script for VAE training."""
+
 from functools import partial
 
 import hydra
-from omegaconf import DictConfig, OmegaConf
 import wandb
+from omegaconf import DictConfig, OmegaConf
 
 from src.train_vae import main as run_train_vae
 
 
-def run_sweep(cfg: DictConfig):
+def run_sweep(cfg: DictConfig) -> None:
     with wandb.init() as run:
         # Deepcopy the original config
         _cfg = cfg.copy()
@@ -25,9 +27,10 @@ def run_sweep(cfg: DictConfig):
 
 
 @hydra.main(version_base="1.3", config_path="../configs", config_name="sweep_vae.yaml")
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     # Convert sweep config to container for wandb
     sweep_config = OmegaConf.to_container(cfg.sweep_config, resolve=True)
+    assert isinstance(sweep_config, dict)
 
     # Initialize the sweep
     sweep_id = wandb.sweep(sweep_config, project="sweep-vae")

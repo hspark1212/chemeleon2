@@ -1,33 +1,38 @@
-from functools import partial
+# type: ignore
+"""Latent Diffusion Model PyTorch Lightning module."""
+
 from collections import defaultdict
+from functools import partial
 
 import torch
 from lightning import LightningModule
-from torch_geometric.utils import to_dense_batch
 from peft import LoraConfig, get_peft_model
+from torch_geometric.utils import to_dense_batch
 
+from src.data.data_augmentation import apply_augmentation
 from src.data.schema import CrystalBatch
+from src.ldm_module.condition import ConditionModule
 from src.ldm_module.denoisers.dit import DiT
 from src.ldm_module.diffusion import create_diffusion
-from src.ldm_module.condition import ConditionModule
-from src.data.data_augmentation import apply_augmentation
 from src.vae_module.vae_module import VAEModule
 
 
 class LDMModule(LightningModule):
+    """Latent Diffusion Model PyTorch Lightning module."""
+
     def __init__(
         self,
         normalize_latent: bool,
         denoiser: DiT,
-        augmentation: dict,
+        augmentation: dict | object,
         diffusion_configs: dict,
         optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
+        scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
         condition_module: dict | None = None,
         vae_ckpt_path: str | None = None,
         ldm_ckpt_path: str | None = None,
         lora_configs: dict | None = None,
-    ):
+    ) -> None:
         super().__init__()
 
         # Normalize latent vectors
@@ -247,9 +252,7 @@ class LDMModule(LightningModule):
         if collect_trajectory:
             for k, v in trajectory.items():
                 setattr(batch_rec, f"{k}s", torch.stack(v, dim=0))
-        setattr(
-            batch_rec, "mask", mask if not self.use_cfg else mask.chunk(2, dim=0)[0]
-        )
+        batch_rec.mask = mask if not self.use_cfg else mask.chunk(2, dim=0)[0]
 
         # Return results
         if return_trajectory:
@@ -266,7 +269,7 @@ class LDMModule(LightningModule):
         res: dict,
         split: str,
         batch_size: int | None = None,
-    ):
+    ) -> None:
         for k, v in res.items():
             if isinstance(v, torch.Tensor):
                 v = v.mean()

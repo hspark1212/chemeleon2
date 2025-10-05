@@ -1,8 +1,14 @@
+"""Conditioning modules for the latent diffusion model.
+
+This module provides encoders for various conditioning types including compositions,
+chemical systems, numerical values, categorical labels, and text prompts.
+"""
+
 from enum import Enum
-from pymatgen.core import Composition, Element
 
 import torch
 import torch.nn as nn
+from pymatgen.core import Composition, Element
 
 
 class ConditionType(Enum):
@@ -16,14 +22,16 @@ class ConditionType(Enum):
 
 
 class ConditionModule(nn.Module):
+    """Conditional encoding module for latent diffusion."""
+
     def __init__(
         self,
         condition_type: dict,
         hidden_dim: int,
         drop_prob: float,
-        stats: dict = None,
+        stats: dict | None = None,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__()
         self.condition_type = condition_type
         self.target_condition = list(condition_type.keys())
@@ -51,9 +59,9 @@ class ConditionModule(nn.Module):
                     std=_stats.get("std", None),
                 )
             elif cond_type == ConditionType.CATEGORICAL.value:
-                assert (
-                    "num_classes" in kwargs
-                ), "num_classes must be provided when using CLASS condition type"
+                assert "num_classes" in kwargs, (
+                    "num_classes must be provided when using CLASS condition type"
+                )
                 self.encoders[cond_name] = CategoricalEncoder(
                     in_dim=kwargs["num_classes"],
                     hidden_dim=hidden_dim,
@@ -80,9 +88,9 @@ class ConditionModule(nn.Module):
         :returns: Embeddings of shape (B, L) during training, or (2*B, L) during inference.
         """
         target_conditions = list(batch_y.keys())
-        assert set(target_conditions) == set(
-            self.target_condition
-        ), f"Expected conditions {self.target_condition}, but got {target_conditions}"
+        assert set(target_conditions) == set(self.target_condition), (
+            f"Expected conditions {self.target_condition}, but got {target_conditions}"
+        )
 
         batch_size = len(list(batch_y.values())[0])
         if training:
@@ -121,13 +129,15 @@ def _duplicate(v):
 #                               Encoders                                #
 #########################################################################
 class BaseEncoder(nn.Module):
+    """Base encoder class for conditioning modalities."""
+
     def __init__(
         self,
         *,
         in_dim: int,
         hidden_dim: int,
-        preprocess: callable,
-    ):
+        preprocess,
+    ) -> None:
         super().__init__()
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
@@ -153,7 +163,9 @@ class BaseEncoder(nn.Module):
 
 
 class ValueEncoder(BaseEncoder):
-    def __init__(self, hidden_dim, mean=None, std=None):
+    """Encoder for continuous scalar values."""
+
+    def __init__(self, hidden_dim, mean=None, std=None) -> None:
         def preprocess(batch):
             batch = torch.as_tensor(batch).float().unsqueeze(-1)
             if mean is not None and std is not None:
@@ -168,7 +180,9 @@ class ValueEncoder(BaseEncoder):
 
 
 class CategoricalEncoder(BaseEncoder):
-    def __init__(self, in_dim, hidden_dim):
+    """Encoder for categorical variables."""
+
+    def __init__(self, in_dim, hidden_dim) -> None:
         def preprocess(batch):
             idx = torch.as_tensor(batch).long()
             return torch.nn.functional.one_hot(idx, num_classes=in_dim).float()
@@ -181,7 +195,9 @@ class CategoricalEncoder(BaseEncoder):
 
 
 class CompositionEncoder(BaseEncoder):
-    def __init__(self, in_dim, hidden_dim):
+    """Encoder for chemical composition."""
+
+    def __init__(self, in_dim, hidden_dim) -> None:
         def preprocess(batch):
             vals = [self._composition_to_embeds(comp_str) for comp_str in batch]
             return torch.cat(vals, dim=0)
@@ -202,7 +218,9 @@ class CompositionEncoder(BaseEncoder):
 
 
 class ChemicalSystemEncoder(BaseEncoder):
-    def __init__(self, in_dim, hidden_dim):
+    """Encoder for chemical system representation."""
+
+    def __init__(self, in_dim, hidden_dim) -> None:
         def preprocess(batch):
             vals = [self._chemical_system_to_embeds(cs) for cs in batch]
             return torch.cat(vals, dim=0)
@@ -221,8 +239,10 @@ class ChemicalSystemEncoder(BaseEncoder):
         return v.unsqueeze(0)
 
 
-class TextEncoder(BaseEncoder):  # TODO: Placeholder for text encoder
-    def __init__(self, hidden_dim):
+class TextEncoder(BaseEncoder):
+    """Placeholder text encoder for future text conditioning."""
+
+    def __init__(self, hidden_dim) -> None:
         def preprocess(batch):
             return torch.zeros(len(batch), 100)  # Dummy tensor
 

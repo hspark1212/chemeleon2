@@ -11,9 +11,9 @@ from src.data.schema import CrystalBatch
 
 def apply_augmentation(
     batch: CrystalBatch, translate: bool, rotate: bool
-) -> tuple[CrystalBatch, CrystalBatch]:
+) -> CrystalBatch:
     # Create a copy of the batch for augmentation
-    batch_aug = batch.clone()
+    batch_aug = batch.clone()  # type: ignore
 
     # Apply translate
     if translate:
@@ -66,9 +66,11 @@ def _augmentation_rotate(batch: CrystalBatch) -> CrystalBatch:
 
 
 def apply_noise(
-    batch: CrystalBatch, ratio: float, corruption_scale: float = 0.1  # Å
+    batch: CrystalBatch,
+    ratio: float,
+    corruption_scale: float = 0.1,  # Å
 ) -> CrystalBatch:
-    batch_noise = batch.clone()
+    batch_noise = batch.clone()  # type: ignore
     device = batch_noise.cart_coords.device
 
     # Select indices to apply noise
@@ -102,7 +104,7 @@ def apply_noise(
 
 
 def _random_rotation_matrix(validate: bool = False, **tensor_kwargs) -> torch.Tensor:
-    """https://github.com/facebookresearch/all-atom-diffusion-transformer/src/models/components/kabsch_utils.py
+    """https://github.com/facebookresearch/all-atom-diffusion-transformer/src/models/components/kabsch_utils.py.
 
     Generates a random (3,3) rotation matrix.
 
@@ -112,7 +114,6 @@ def _random_rotation_matrix(validate: bool = False, **tensor_kwargs) -> torch.Te
     Returns:
         A tensor of shape (3, 3) representing the rotation matrix.
     """
-
     # Generate a random quaternion
     q = torch.rand(4, **tensor_kwargs)
     q /= torch.linalg.norm(q)

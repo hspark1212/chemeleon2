@@ -1,5 +1,8 @@
+"""Timeout decorator for functions that may hang."""
+
 import functools
 import signal
+from typing import Never
 
 
 def timeout(seconds, default=None, verbose=False):
@@ -18,7 +21,7 @@ def timeout(seconds, default=None, verbose=False):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*a, **kw):
-            def _raise(signum, frame):
+            def _raise(signum, frame) -> Never:
                 raise TimeoutError
 
             old_handler = signal.signal(signal.SIGALRM, _raise)

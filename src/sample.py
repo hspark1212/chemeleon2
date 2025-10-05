@@ -1,11 +1,12 @@
+"""Sampling script for generating crystal structures from trained models."""
+
 from pathlib import Path
-from fire import Fire
 
 import numpy as np
-from pymatgen.core import Structure, Composition
-from monty.serialization import dumpfn
-
 import torch
+from fire import Fire
+from monty.serialization import dumpfn
+from pymatgen.core import Composition, Structure
 
 from src.data.num_atom_distributions import NUM_ATOM_DISTRIBUTIONS
 from src.data.schema import create_empty_batch
@@ -17,18 +18,18 @@ DEFAULT_MODEL_PATH = "ckpts/ldm/kl_1e-5_last/model.ckpt"  # TODO: update this pa
 def sample(
     num_samples: int = 10000,
     batch_size: int = 2000,
-    compositions: list = None,
-    text_prompts: list = None,
+    compositions: list | None = None,
+    text_prompts: list | None = None,
     num_atom_distribution: str = "mp-20",
-    model_path: str = None,
+    model_path: str | None = None,
     output_dir: str = "outputs",
     sampler: str = "ddim",
     sampling_steps: int = 50,
     cfg_scale: float = 2.0,  # Only used if use_cfg=True
-    device: str = None,
+    device: str | None = None,
     save_json: bool = True,
 ):
-    """Sample crystal structures using a pre-trained LDM model.
+    r"""Sample crystal structures using a pre-trained LDM model.
 
     if compositions are provided, it performs the CSP (Crystal Structure Prediction) task.
     elif text_prompts are provided, it performs the TSP (Text-to-Structure Prediction) task.
@@ -85,10 +86,10 @@ def sample(
         num_atoms = [int(c.num_atoms) for c in compositions]
     # DNG task
     else:
-        num_atom_distribution = NUM_ATOM_DISTRIBUTIONS[num_atom_distribution]
+        num_atom_dist_dict = NUM_ATOM_DISTRIBUTIONS[num_atom_distribution]
         num_atoms = np.random.choice(
-            list(num_atom_distribution.keys()),
-            p=list(num_atom_distribution.values()),
+            list(num_atom_dist_dict.keys()),
+            p=list(num_atom_dist_dict.values()),
             size=num_samples,
         ).tolist()
         print(f"DNG task: {num_samples} samples")
@@ -112,7 +113,8 @@ def sample(
         print(f"Generating batch #{i // batch_size + 1} with {batch_size} samples.")
         # Create an empty batch with the specified number of atoms
         batch = create_empty_batch(num_atoms[i : i + batch_size], device=device)
-        batch.y = compositions[i : i + batch_size] if compositions else None
+        # batch.y type annotation is dict[str, Tensor] but accepts list[Composition] at runtime
+        batch.y = compositions[i : i + batch_size] if compositions else None  # type: ignore[assignment]
         # Generate samples
         with torch.no_grad():
             gen_st_list = ldm_module.sample(
@@ -122,11 +124,19 @@ def sample(
                 cfg_scale=cfg_scale,
                 return_structure=True,
             )
-        sampled_structures.extend([st.to_ase_atoms() for st in gen_st_list])
+        # pymatgen Structure has to_ase_atoms() but not in type stubs
+        sampled_structures.extend([st.to_ase_atoms() for st in gen_st_list])  # type: ignore[attr-defined]
 
         # Save generated structures
+        assert isinstance(gen_st_list, list)
         for j, st in enumerate(gen_st_list):
-            st.to(output_path / f"sample_{i+j}_{st.formula.replace(' ', '')}.cif")
+            # st is a pymatgen Structure object
+            st.to(  # type: ignore[attr-defined]
+                filename=str(
+                    output_path / f"sample_{i + j}_{st.formula.replace(' ', '')}.cif"  # type: ignore[attr-defined]
+                ),
+                fmt="cif",
+            )
 
     # Save generated structures in JSON format
     if save_json:

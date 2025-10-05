@@ -19,6 +19,12 @@ cd chemeleon2
 
 # Install dependencies with uv
 uv sync
+
+# (Optional) Install development dependencies (pytest, ruff, pyright, etc.)
+uv pip install -e ".[dev]"
+
+# (Optional) Install metrics dependencies for evaluation (mace-torch, smact)
+uv pip install -e ".[metrics]"
 ```
 
 ## (Optional) Pytorch Installation with CUDA
@@ -107,3 +113,7 @@ python src/train_ldm.py ckpt_path=/path/to/checkpoint.ckpt
 - torch-geometric
 - pymatgen
 - wandb
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
