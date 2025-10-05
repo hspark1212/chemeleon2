@@ -292,7 +292,7 @@ class Metrics:
 
         # _calc: `e_above_hull`, `stable`
         if "e_above_hull" in self.metrics and self._calc is None:
-            from mace.calculators import mace_mp
+            from mace.calculators import mace_mp  # type: ignore
 
             self._calc = mace_mp(
                 model="medium-mpa-0", device="cuda" if self.use_cuda else "cpu"
@@ -300,7 +300,7 @@ class Metrics:
 
         # _smact_validity_fn: `composition_validity`
         if "composition_validity" in self.metrics and self._smact_validity_fn is None:
-            from smact.screening import smact_validity
+            from smact.screening import smact_validity  # type: ignore
 
             def safe_smact_validity(comp):
                 try:

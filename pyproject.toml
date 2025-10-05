@@ -23,7 +23,6 @@ dependencies = [
     "pydantic>=2.11.7",
     "pymatgen>=2025.6.14",
     "pyyaml>=6.0",
-    "smact>=3.2.0",
     "timm>=1.0.19",
     "torch>=2.6.0",
     "torch-ema>=0.3",
@@ -34,6 +33,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+metrics = [
+    "mace-torch>=0.3.0",  # Energy calculations for e_above_hull
+    "smact>=3.2.0",       # Composition validity checks
+]
 dev = [
     "jupyterlab>=4.4.6",  # Jupyter development environment
     "nglview>=3.1.4",     # 3D structure visualization
