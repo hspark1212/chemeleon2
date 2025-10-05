@@ -1,3 +1,4 @@
+# type: ignore
 """Latent Diffusion Model PyTorch Lightning module."""
 
 from collections import defaultdict

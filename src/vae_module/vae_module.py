@@ -1,3 +1,4 @@
+# type: ignore
 """Variational Autoencoder PyTorch Lightning module."""
 
 import numpy as np

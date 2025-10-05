@@ -1,3 +1,4 @@
+# type: ignore
 """Reinforcement Learning PyTorch Lightning module using GRPO."""
 
 import math

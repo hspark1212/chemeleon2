@@ -1,3 +1,4 @@
+# type: ignore
 """Property predictor PyTorch Lightning module."""
 
 import torch
