@@ -18,15 +18,13 @@ repos:
         stages: [pre-commit]
 
   # Pyright - Static type checker for Python
-  # TEMPORARILY DISABLED due to pre-existing type issues in codebase
-  # Will be re-enabled once type issues are resolved
   # See: Decision 13 in research.md - basic mode chosen for practical type checking
-  # - repo: https://github.com/RobertCraigie/pyright-python
-  #   rev: v1.1.406  # Pinned version for consistency
-  #   hooks:
-  #     - id: pyright
-  #       name: "Pyright Type Check"
-  #       stages: [commit]
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.406  # Pinned version for consistency
+    hooks:
+      - id: pyright
+        name: "Pyright Type Check"
+        stages: [pre-commit]
 
   # Pre-commit hooks - File validation utilities
   - repo: https://github.com/pre-commit/pre-commit-hooks

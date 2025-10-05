@@ -45,6 +45,13 @@ class CrystalBatch(Batch):
     pos: Tensor
     token_idx: Tensor
     batch: Tensor  # Batch assignment for each node
+    y: dict[str, Tensor]  # Target properties for supervised learning
+    num_nodes: int  # Number of nodes in the batch
+    mace_features: Tensor  # MACE features for Foundation Alignment loss
+    mask: Tensor  # Mask for sampling (optional, dynamically added)
+    zs: Tensor  # Latent trajectory (optional, dynamically added for RL)
+    means: Tensor  # Means trajectory (optional, dynamically added for RL)
+    stds: Tensor  # Stds trajectory (optional, dynamically added for RL)
 
     def add(self, **kwargs) -> None:
         for key, tensor in kwargs.items():

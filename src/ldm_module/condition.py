@@ -29,7 +29,7 @@ class ConditionModule(nn.Module):
         condition_type: dict,
         hidden_dim: int,
         drop_prob: float,
-        stats: dict = None,
+        stats: dict | None = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -136,7 +136,7 @@ class BaseEncoder(nn.Module):
         *,
         in_dim: int,
         hidden_dim: int,
-        preprocess: callable,
+        preprocess,
     ) -> None:
         super().__init__()
         self.in_dim = in_dim

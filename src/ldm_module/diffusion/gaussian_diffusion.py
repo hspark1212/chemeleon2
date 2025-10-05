@@ -380,6 +380,8 @@ class GaussianDiffusion:
         In particular, cond_fn computes grad(log(p(y|x))), and we want to condition on y. This uses
         the conditioning strategy from Sohl-Dickstein et al. (2015).
         """
+        if model_kwargs is None:
+            model_kwargs = {}
         gradient = cond_fn(x, t, **model_kwargs)
         new_mean = (
             p_mean_var["mean"].float() + p_mean_var["variance"] * gradient.float()
@@ -393,6 +395,8 @@ class GaussianDiffusion:
         See condition_mean() for details on cond_fn. Unlike condition_mean(), this instead uses the
         conditioning strategy from Song et al (2020).
         """
+        if model_kwargs is None:
+            model_kwargs = {}
         alpha_bar = _extract_into_tensor(self.alphas_cumprod, t, x.shape)
 
         eps = self._predict_eps_from_xstart(x, t, p_mean_var["pred_xstart"])
@@ -435,6 +439,8 @@ class GaussianDiffusion:
             denoised_fn=denoised_fn,
             model_kwargs=model_kwargs,
         )
+        if model_kwargs is None:
+            model_kwargs = {}
         noise = maybe_noise_like_with_mask(x, model_kwargs.get("mask"))
         nonzero_mask = (
             (t != 0).float().view(-1, *([1] * (len(x.shape) - 1)))
@@ -494,6 +500,9 @@ class GaussianDiffusion:
             progress=progress,
         ):
             final = sample
+        assert final is not None, (
+            "p_sample_loop_progressive should yield at least one sample"
+        )
         return final["sample"]
 
     def p_sample_loop_progressive(
@@ -521,6 +530,8 @@ class GaussianDiffusion:
             img = noise
         else:
             img = th.empty(*shape, device=device)
+            if model_kwargs is None:
+                model_kwargs = {}
             img = maybe_noise_like_with_mask(img, model_kwargs.get("mask"))
         indices = list(range(self.num_timesteps))[::-1]
 
@@ -583,6 +594,8 @@ class GaussianDiffusion:
             * th.sqrt(1 - alpha_bar / alpha_bar_prev)
         )
         # Equation 12.
+        if model_kwargs is None:
+            model_kwargs = {}
         noise = maybe_noise_like_with_mask(x, model_kwargs.get("mask"))
         mean_pred = (
             out["pred_xstart"] * th.sqrt(alpha_bar_prev)
@@ -669,6 +682,9 @@ class GaussianDiffusion:
             eta=eta,
         ):
             final = sample
+        assert final is not None, (
+            "ddim_sample_loop_progressive should yield at least one sample"
+        )
         return final["sample"]
 
     def ddim_sample_loop_progressive(
@@ -696,6 +712,8 @@ class GaussianDiffusion:
             img = noise
         else:
             img = th.empty(*shape, device=device)
+            if model_kwargs is None:
+                model_kwargs = {}
             img = maybe_noise_like_with_mask(img, model_kwargs.get("mask"))
         indices = list(range(self.num_timesteps))[::-1]
 
@@ -731,7 +749,7 @@ class GaussianDiffusion:
                  - 'output': a shape [N] tensor of NLLs or KLs.
                  - 'pred_xstart': the x_0 predictions.
         """
-        if mask is None:
+        if mask is None and model_kwargs is not None:
             mask = model_kwargs.get("mask", None)
         true_mean, _, true_log_variance_clipped = self.q_posterior_mean_variance(
             x_start=x_start, x_t=x_t, t=t

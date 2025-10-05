@@ -20,14 +20,12 @@ class Visualizer:
 
     def __init__(
         self,
-        atoms_list: list[Atoms] = None,
+        atoms_list: list[Atoms],
         atomic_size: float = 0.8,
         opacity: float = 1,
         resolution: int = 19,
-        layout_kwargs: dict = None,
+        layout_kwargs: dict | None = None,
     ) -> None:
-        if atoms_list is None:
-            raise ValueError("atoms_list must be provided.")
         self.atoms_list = atoms_list
         self.atomic_size = atomic_size
         self.opacity = opacity
@@ -107,7 +105,8 @@ class Visualizer:
             )
 
         # Dynamically create unit cell lines for the current frame
-        a, b, c = atoms.cell
+        cell_array = atoms.cell.array
+        a, b, c = cell_array[0], cell_array[1], cell_array[2]
         lines = [
             [[0, 0, 0], a],
             [[0, 0, 0], b],
@@ -210,10 +209,10 @@ class Visualizer:
         return self.fig
 
     def save_html(self, save_path: str = "trajectory.html") -> None:
-        save_path = Path(save_path)
+        save_path_obj = Path(save_path)
         if self.fig is None:
             raise ValueError(
                 "You must call view_trajectory() before saving the trajectory."
             )
-        self.fig.write_html(save_path)
-        print(f"Saved trajectory to {save_path}")
+        self.fig.write_html(save_path_obj)
+        print(f"Saved trajectory to {save_path_obj}")

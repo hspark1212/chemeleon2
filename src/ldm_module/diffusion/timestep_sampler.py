@@ -54,6 +54,7 @@ class ScheduleSampler(ABC):
                  - weights: a tensor of weights to scale the resulting losses.
         """
         w = self.weights()
+        assert w is not None, "weights() should not return None"
         p = w / np.sum(w)
         indices_np = np.random.choice(len(p), size=(batch_size,), p=p)
         indices = th.from_numpy(indices_np).long().to(device)
@@ -98,8 +99,8 @@ class LossAwareSampler(ScheduleSampler):
         batch_sizes = [x.item() for x in batch_sizes]
         max_bs = max(batch_sizes)
 
-        timestep_batches = [th.zeros(max_bs).to(local_ts) for bs in batch_sizes]
-        loss_batches = [th.zeros(max_bs).to(local_losses) for bs in batch_sizes]
+        timestep_batches = [th.zeros(int(max_bs)).to(local_ts) for bs in batch_sizes]
+        loss_batches = [th.zeros(int(max_bs)).to(local_losses) for bs in batch_sizes]
         dist.all_gather(timestep_batches, local_ts)
         dist.all_gather(loss_batches, local_losses)
         timesteps = [
@@ -138,7 +139,7 @@ class LossSecondMomentResampler(LossAwareSampler):
         self._loss_history = np.zeros(
             [diffusion.num_timesteps, history_per_term], dtype=np.float64
         )
-        self._loss_counts = np.zeros([diffusion.num_timesteps], dtype=np.int)
+        self._loss_counts = np.zeros([diffusion.num_timesteps], dtype=np.int64)
 
     def weights(self):
         if not self._warmed_up():
@@ -151,13 +152,15 @@ class LossSecondMomentResampler(LossAwareSampler):
 
     def update_with_all_losses(self, ts, losses) -> None:
         for t, loss in zip(ts, losses, strict=False):
-            if self._loss_counts[t] == self.history_per_term:
+            t_int = int(t)
+            if self._loss_counts[t_int] == self.history_per_term:
                 # Shift out the oldest loss term.
-                self._loss_history[t, :-1] = self._loss_history[t, 1:]
-                self._loss_history[t, -1] = loss
+                self._loss_history[t_int, :-1] = self._loss_history[t_int, 1:]
+                self._loss_history[t_int, -1] = loss
             else:
-                self._loss_history[t, self._loss_counts[t]] = loss
-                self._loss_counts[t] += 1
+                count_idx = int(self._loss_counts[t_int])
+                self._loss_history[t_int, count_idx] = loss
+                self._loss_counts[t_int] += 1
 
     def _warmed_up(self):
         return (self._loss_counts == self.history_per_term).all()

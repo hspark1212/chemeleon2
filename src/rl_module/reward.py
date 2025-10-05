@@ -86,7 +86,7 @@ class ReinforceReward(torch.nn.Module):
         print("Reward function setup complete.")
 
     def forward(
-        self, batch_gen: CrystalBatch, device: torch.device = None
+        self, batch_gen: CrystalBatch, device: torch.device | None = None
     ) -> torch.Tensor:
         # Calculate reward
         rewards = self.reward_fn(batch_gen=batch_gen)
@@ -158,6 +158,7 @@ def reward_dng(batch_gen: CrystalBatch, m: Metrics, **kwargs) -> torch.Tensor:
     # # 3. Structure diversity
     gen_features = featurize(gen_structures)
     gen_structure_features = gen_features["structure_features"]
+    assert m._reference_structure_features is not None
     ref_structure_features = m._reference_structure_features.to(
         gen_structure_features.device
     )
@@ -171,6 +172,7 @@ def reward_dng(batch_gen: CrystalBatch, m: Metrics, **kwargs) -> torch.Tensor:
 
     # 4. Composition diversity
     gen_composition_features = gen_features["composition_features"]
+    assert m._reference_composition_features is not None
     ref_composition_features = m._reference_composition_features.to(
         gen_composition_features.device
     )
@@ -213,9 +215,9 @@ def reward_csp(batch_gen: CrystalBatch, m: Metrics) -> torch.Tensor:
 
     # 3. Composition matching
     gen_compositions = [st.reduced_formula for st in gen_structures]
-    ref_compositions = [
-        Composition(y).reduced_formula for y in batch_gen.y["composition"]
-    ]
+    y = getattr(batch_gen, "y", None)
+    assert y is not None and "composition" in y
+    ref_compositions = [Composition(comp).reduced_formula for comp in y["composition"]]
     r_composition_matching = torch.tensor(
         [
             gen_comp == ref_comp
@@ -250,6 +252,7 @@ def reward_bandgap(
 
     # For diversity reward (This part is optional, can be removed if not needed)
     m = Metrics(metrics=["composition_diversity"])
+    assert m._reference_composition_features is not None
     ref_composition_features = m._reference_composition_features.to(device)
     gen_structures = batch_gen.to_structure()
     gen_features = featurize(gen_structures)

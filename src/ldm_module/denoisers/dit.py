@@ -20,6 +20,7 @@ adapted from Meta's DiT paper with support for variable-length sequences and mas
 # --------------------------------------------------------
 
 import math
+from collections.abc import Callable
 
 import torch
 import torch.nn as nn
@@ -77,7 +78,7 @@ def get_pos_embedding(indices, emb_dim, max_len=2048):
     pos_embedding_cos = torch.cos(
         indices[..., None] * math.pi / (max_len ** (2 * K[None] / emb_dim))
     ).to(indices.device)
-    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], axis=-1)
+    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], dim=-1)
     return pos_embedding
 
 
@@ -94,7 +95,7 @@ class Mlp(nn.Module):
         in_features,
         hidden_features=None,
         out_features=None,
-        act_layer=nn.GELU,
+        act_layer: Callable[[], nn.Module] = nn.GELU,
         norm_layer=None,
         bias=True,
         drop=0.0,
@@ -134,13 +135,10 @@ class DiTBlock(nn.Module):
         self.norm2 = nn.LayerNorm(hidden_dim, elementwise_affine=False, eps=1e-6)
         mlp_hidden_dim = int(hidden_dim * mlp_ratio)
 
-        def approx_gelu():
-            return nn.GELU(approximate="tanh")
-
         self.mlp = Mlp(
             in_features=hidden_dim,
             hidden_features=mlp_hidden_dim,
-            act_layer=approx_gelu,
+            act_layer=lambda: nn.GELU(approximate="tanh"),
             drop=0,
         )
         self.adaLN_modulation = nn.Sequential(
@@ -229,17 +227,17 @@ class DiT(nn.Module):
         nn.init.normal_(self.x_embedder.weight, std=0.02)
 
         # Initialize timestep embedding MLP:
-        nn.init.normal_(self.t_embedder.mlp[0].weight, std=0.02)
-        nn.init.normal_(self.t_embedder.mlp[2].weight, std=0.02)
+        nn.init.normal_(self.t_embedder.mlp[0].weight, std=0.02)  # type: ignore
+        nn.init.normal_(self.t_embedder.mlp[2].weight, std=0.02)  # type: ignore
 
         # Zero-out adaLN modulation layers in DiT blocks:
         for block in self.blocks:
-            nn.init.constant_(block.adaLN_modulation[-1].weight, 0)
-            nn.init.constant_(block.adaLN_modulation[-1].bias, 0)
+            nn.init.constant_(block.adaLN_modulation[-1].weight, 0)  # type: ignore
+            nn.init.constant_(block.adaLN_modulation[-1].bias, 0)  # type: ignore
 
         # Zero-out output layers:
-        nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)
-        nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)
+        nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)  # type: ignore
+        nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)  # type: ignore
         nn.init.constant_(self.final_layer.linear.weight, 0)
         nn.init.constant_(self.final_layer.linear.bias, 0)
 

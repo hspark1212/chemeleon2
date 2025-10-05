@@ -195,7 +195,9 @@ class CSPNet(nn.Module):
         node_features = self.node_embedding(atom_types)  # [B_n, hidden_dim]
 
         for i in range(0, self.num_layers):
-            node_features = self._modules[f"csp_layer_{i}"](
+            csp_layer = self._modules[f"csp_layer_{i}"]
+            assert csp_layer is not None
+            node_features = csp_layer(
                 node_features=node_features,
                 lattices=lattices,
                 frac_coords=frac_coords,

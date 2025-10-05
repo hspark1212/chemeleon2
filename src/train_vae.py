@@ -35,8 +35,9 @@ def main(cfg: DictConfig) -> None:
     logger: list[Logger] = instantiate_loggers(cfg.get("logger"))
     for lg in logger:
         if isinstance(lg, WandbLogger):
-            full_cfg = OmegaConf.to_container(cfg, resolve=True)
-            lg.log_hyperparams(full_cfg)
+            full_cfg_container = OmegaConf.to_container(cfg, resolve=True)
+            assert isinstance(full_cfg_container, dict)
+            lg.log_hyperparams(full_cfg_container)  # type: ignore[arg-type]
 
     # Set up Trainer
     trainer: Trainer = hydra.utils.instantiate(

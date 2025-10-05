@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import warnings
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -48,7 +49,7 @@ PATH_PHASE_DIAGRAM = {  # find details in "benchmarks/assets/README.md"
 ###############################################################################
 #                             Registered decorators                           #
 ###############################################################################
-_REGISTRY: dict[str, callable] = {}
+_REGISTRY: dict[str, Callable] = {}
 
 
 def register_metric(name: str):
@@ -233,10 +234,10 @@ class Metrics:
     >>> df = m.to_dataframe()
     """
 
-    metrics: list[str] = None
+    metrics: list[str] | None = None
     reference_dataset: str = "mp-20"
     phase_diagram: str = "mp-all"
-    sm: StructureMatcher = None
+    sm: StructureMatcher | None = None
     metastable_threshold: float = 0.1
     progress_bar: bool = True
     use_cuda: bool = True
@@ -244,12 +245,14 @@ class Metrics:
     # runtime
     gen_structures: list[Structure] = field(default_factory=list, init=False)
     _reference_structures: list[Structure] = field(default_factory=list, init=False)
-    _pd: PatchedPhaseDiagram | PhaseDiagram = field(default=None, init=False)
-    _calc: Calculator = field(default=None, init=False)
-    _smact_validity_fn: callable = field(default=None, init=False)
-    _reference_structure_features: torch.Tensor = field(default=None, init=False)
-    _reference_composition_features: torch.Tensor = field(default=None, init=False)
-    _results: dict[str, list] = field(default_factory=dict, init=False)
+    _pd: PatchedPhaseDiagram | PhaseDiagram | None = field(default=None, init=False)
+    _calc: Calculator | None = field(default=None, init=False)
+    _smact_validity_fn: Callable | None = field(default=None, init=False)
+    _reference_structure_features: torch.Tensor | None = field(default=None, init=False)
+    _reference_composition_features: torch.Tensor | None = field(
+        default=None, init=False
+    )
+    _results: dict = field(default_factory=dict, init=False)
 
     def __post_init__(self):
         if self.metrics is None:
@@ -284,7 +287,7 @@ class Metrics:
             with gzip.open(path_phase_diagram, "rb") as f:
                 self._pd = pickle.load(f)
             print(
-                f"Loaded phase diagram from {path_phase_diagram} with {len(self._pd)} entries"
+                f"Loaded phase diagram from {path_phase_diagram} with {len(self._pd)} entries"  # type: ignore
             )
 
         # _calc: `e_above_hull`, `stable`
@@ -336,6 +339,7 @@ class Metrics:
     def compute(self, gen_structures: list[Structure]):
         self._results = {}
         self.gen_structures = gen_structures
+        assert self.metrics is not None
         names = self.metrics
         for name in names:
             if name not in _REGISTRY:
@@ -370,7 +374,7 @@ class Metrics:
         """Convert results to a pandas DataFrame."""
         df = pd.DataFrame(self._results)
         if include_structure:
-            df["cif"] = [s.to(fmt="cif") for s in self._gen_structures]
+            df["cif"] = [s.to(fmt="cif") for s in self.gen_structures]
         return df
 
     def to_csv(self, path: str) -> None:
@@ -450,11 +454,11 @@ def frechet_distance(
     mean_diff = np.sum((mu_1 - mu_2) ** 2)
 
     # Compute sqrt of product of covariances
-    sqrt_product = sqrtm(sigma_1 @ sigma_2)
+    sqrt_product = np.asarray(sqrtm(sigma_1 @ sigma_2))
 
     # Handle numerical issues with complex numbers
     if np.iscomplexobj(sqrt_product):
-        sqrt_product = sqrt_product.real
+        sqrt_product = np.real(sqrt_product)
 
     # Compute Fréchet distance
     trace_term = np.trace(sigma_1 + sigma_2 - 2 * sqrt_product)
@@ -482,7 +486,7 @@ def structures_to_amd(structures, k=100, from_structure=False):
             amds = []
             for path in paths:
                 pset = amd.CifReader(path).read()
-                amds.append(amd.AMD(pset, k))
+                amds.append(amd.AMD(pset, k))  # type: ignore
             return amds
         finally:
             shutil.rmtree(temp_dir)

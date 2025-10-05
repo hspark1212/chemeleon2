@@ -30,6 +30,7 @@ def run_sweep(cfg: DictConfig) -> None:
 def main(cfg: DictConfig) -> None:
     # Convert sweep config to container for wandb
     sweep_config = OmegaConf.to_container(cfg.sweep_config, resolve=True)
+    assert isinstance(sweep_config, dict)
 
     # Initialize the sweep
     sweep_id = wandb.sweep(sweep_config, project="sweep-vae")

@@ -27,7 +27,7 @@ class MPDataset(InMemoryDataset):
         self,
         root: str,
         split: str,
-        target_condition: str | None = None,
+        target_condition: str | Iterable[str] | None = None,
         mace_features: bool = False,
         transform: Callable[[Data], Data] | None = None,
         pre_transform: Callable[[Data], Data] | None = None,
@@ -63,7 +63,7 @@ class MPDataset(InMemoryDataset):
                 for material_id in self.df["material_id"]:
                     if str(material_id) in f:
                         self.mace_features_dict[material_id] = torch.tensor(
-                            f[str(material_id)][:]
+                            f[str(material_id)][:]  # type: ignore[index]
                         )
 
     @property
@@ -98,8 +98,8 @@ class MPDataset(InMemoryDataset):
             material_id = row["material_id"]
 
             # Parse CIF string
-            cif_str = row["cif"]
-            st = Structure.from_str(cif_str, fmt="cif")
+            cif_str = str(row["cif"])
+            st = Structure.from_str(cif_str, fmt="cif")  # type: ignore[arg-type]
 
             # Niggli reduction for canonical form
             reduced = st.get_reduced_structure()
@@ -122,7 +122,7 @@ class MPDataset(InMemoryDataset):
         data, slices = self.collate(data_list)
         torch.save((data, slices), self.processed_paths[0])
 
-    def get(self, idx: int) -> Data:
+    def get(self, idx: int):
         """Get data object by index with optional conditions and MACE features.
 
         Args:

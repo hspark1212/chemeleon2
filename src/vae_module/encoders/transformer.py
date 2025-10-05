@@ -8,6 +8,8 @@ import torch
 from torch import nn
 from torch_geometric.utils import to_dense_batch
 
+from src.data.schema import CrystalBatch
+
 
 def get_index_embedding(indices, emb_dim, max_len=2048):
     """Creates sine / cosine positional embeddings from a prespecified indices.
@@ -27,7 +29,7 @@ def get_index_embedding(indices, emb_dim, max_len=2048):
     pos_embedding_cos = torch.cos(
         indices[..., None] * math.pi / (max_len ** (2 * K[None] / emb_dim))
     ).to(indices.device)
-    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], axis=-1)
+    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], dim=-1)
     return pos_embedding
 
 
@@ -95,10 +97,10 @@ class TransformerEncoder(nn.Module):
         )
 
     @property
-    def hidden_dim(self):
+    def hidden_dim(self) -> int:
         return self.d_model
 
-    def forward(self, batch: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
+    def forward(self, batch: CrystalBatch) -> dict[str, torch.Tensor]:
         """Args:
         batch: Data object with the following attributes:
             atom_types (torch.Tensor): Atomic numbers of atoms in the batch
@@ -111,15 +113,22 @@ class TransformerEncoder(nn.Module):
             num_atoms (torch.Tensor): Number of atoms in the batch
             batch (torch.Tensor): Batch index for each atom.
         """
-        x = self.atom_type_embedder(batch.atom_types)
-        x += self.lattices_embedder(batch.lattices.view(-1, 9))[batch.batch]
-        x += self.frac_coords_embedder(batch.frac_coords)
+        atom_types = batch.atom_types
+        lattices = batch.lattices
+        frac_coords = batch.frac_coords
+        token_idx = batch.token_idx
+        batch_idx = batch.batch
+        num_atoms = batch.num_atoms
+
+        x = self.atom_type_embedder(atom_types)
+        x += self.lattices_embedder(lattices.view(-1, 9))[batch_idx]
+        x += self.frac_coords_embedder(frac_coords)
 
         # Positional embedding
-        x += get_index_embedding(batch.token_idx, self.d_model)
+        x += get_index_embedding(token_idx, self.d_model)
 
         # Convert from PyG batch to dense batch with padding
-        x, token_mask = to_dense_batch(x, batch.batch)
+        x, token_mask = to_dense_batch(x, batch_idx)
 
         # Transformer forward pass
         x = self.transformer.forward(x, src_key_padding_mask=(~token_mask))
@@ -127,7 +136,7 @@ class TransformerEncoder(nn.Module):
 
         return {
             "x": x,
-            "num_atoms": batch.num_atoms,
-            "batch": batch.batch,
-            "token_idx": batch.token_idx,
+            "num_atoms": num_atoms,
+            "batch": batch_idx,
+            "token_idx": token_idx,
         }

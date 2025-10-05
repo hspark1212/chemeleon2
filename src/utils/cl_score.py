@@ -111,7 +111,7 @@ class AtomInitializer:
         return self._embedding
 
     def decode(self, idx):
-        if not hasattr(self, "_decodedict"):
+        if self._decodedict is None:
             self._decodedict = {
                 idx: atom_type for atom_type, idx in self._embedding.items()
             }
@@ -139,7 +139,7 @@ def create_crystal_graph(
     gdf: GaussianDistance,
 ):
     atom_fea = np.vstack(
-        [ari.get_atom_fea(structure[j].specie.number) for j in range(len(structure))]
+        [ari.get_atom_fea(structure[j].specie.number) for j in range(len(structure))]  # type: ignore[union-attr]
     )
     atom_fea = torch.Tensor(atom_fea)
     all_nbrs = structure.get_all_neighbors(radius, include_index=True)
@@ -349,7 +349,10 @@ def compute_clscore(structures: list[Structure], batch_size=100, use_cuda=True):
         )
     ]
     test_loader = DataLoader(
-        data_list, batch_size=batch_size, shuffle=False, collate_fn=collate_pool
+        data_list,  # type: ignore[arg-type]
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_pool,  # type: ignore[arg-type]
     )
     total_results = []
 

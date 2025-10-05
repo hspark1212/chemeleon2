@@ -14,11 +14,11 @@ DEFAULT_MODEL_PATH = get_checkpoint("mp_20_vae")  # Auto-download from HF Hub
 
 def featurize(
     structures: list[Structure],
-    model_path: str = None,
+    model_path: str | None = None,
     batch_size: int = 2000,
     use_encoder_features: bool = False,
     reduce: str = "mean",
-    device: str = None,
+    device: str | None = None,
 ):
     """Featurize a list of pymatgen Structures using a pre-trained VAE model.
 
@@ -37,8 +37,9 @@ def featurize(
 
     # Load pre-trained VAE
     if model_path is None:
-        model_path = DEFAULT_MODEL_PATH
-    vae = VAEModule.load_from_checkpoint(model_path, map_location=device)
+        vae = VAEModule.load_from_checkpoint(DEFAULT_MODEL_PATH, map_location=device)
+    else:
+        vae = VAEModule.load_from_checkpoint(model_path, map_location=device)
     vae.eval()
 
     # Featurize each structure
@@ -59,7 +60,7 @@ def featurize(
             latent_vector = encoded["posterior"].mode()
             if use_encoder_features:
                 latent_vector = torch.cat([latent_vector, encoded["x"]], dim=-1)
-            composition_vector = vae.encoder.atom_type_embedder(batch.atom_types)
+            composition_vector = vae.encoder.atom_type_embedder(batch.atom_types)  # type: ignore
 
         structure_feature = reduce_fn(latent_vector, batch.batch, dim=0)
         composition_feature = reduce_fn(composition_vector, batch.batch, dim=0)

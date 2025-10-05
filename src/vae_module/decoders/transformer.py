@@ -29,7 +29,7 @@ def get_index_embedding(indices, emb_dim, max_len=2048):
     pos_embedding_cos = torch.cos(
         indices[..., None] * math.pi / (max_len ** (2 * K[None] / emb_dim))
     ).to(indices.device)
-    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], axis=-1)
+    pos_embedding = torch.cat([pos_embedding_sin, pos_embedding_cos], dim=-1)
     return pos_embedding
 
 
@@ -123,10 +123,11 @@ class TransformerDecoder(nn.Module):
         # Fractional coordinates prediction head
         frac_coords_out = self.frac_coords_head(x)
 
-        return {
+        result = {
             "atom_types": atom_types_out,
             "lattices": lattices_out,
             "lengths": lattices_out[:, :3],
             "angles": lattices_out[:, 3:],
             "frac_coords": frac_coords_out,
         }
+        return result
