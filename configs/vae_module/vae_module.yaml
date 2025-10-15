@@ -26,9 +26,6 @@ atom_type_predict: True
 
 structure_matcher:
   _target_: pymatgen.analysis.structure_matcher.StructureMatcher
-  ltol: 0.3
-  stol: 0.5
-  angle_tol: 10
 
 optimizer:
   _target_: torch.optim.AdamW

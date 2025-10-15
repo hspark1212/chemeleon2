@@ -11,7 +11,7 @@ from pymatgen.core import Structure
 
 from src.data.data_augmentation import apply_augmentation, apply_noise
 from src.data.dataset_util import lattice_params_to_matrix_torch
-from src.data.schema import CrystalBatch
+from src.data.schema import CrystalBatch, create_empty_batch
 from src.utils.timeout import timeout
 
 
@@ -235,7 +235,7 @@ class VAEModule(LightningModule):
 
     def reconstruct(self, decoder_out: dict, batch: CrystalBatch):
         # Reconstructed batch
-        batch_recon = batch.clone()
+        batch_recon = create_empty_batch(batch.num_atoms, self.device)
         _atom_types = (
             decoder_out["atom_types"].argmax(dim=-1)
             if self.hparams.atom_type_predict
