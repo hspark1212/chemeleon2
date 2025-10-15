@@ -175,6 +175,8 @@ ckpts/
 *.qsub
 *.qsub.*
 
-# Claude code
-# CLAUDE.md
-# .claude/
+# AI agents
+CLAUDE.md
+.claude/
+.specify/
+specs/
