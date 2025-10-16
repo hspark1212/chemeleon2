@@ -49,16 +49,25 @@ uv sync --extra dev
 uv pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
 ```
 
-### Step 3: Verify Installation
+### Step 3: Install Pre-commit Hooks
 
-Test that everything works:
+Install pre-commit hooks to ensure code quality on every commit:
 
 ```bash
 # activate the virtual environment
 source .venv/bin/activate
 
+# Install pre-commit hooks
+pre-commit install
+```
+
+### Step 4: Verify Installation
+
+Test that everything works:
+
+```bash
 # Run pre-commit hooks on all files to ensure code quality
-.venv/bin/pre-commit run --all-files
+pre-commit run --all-files
 
 # Run pytest to ensure tests pass
 pytest -v
