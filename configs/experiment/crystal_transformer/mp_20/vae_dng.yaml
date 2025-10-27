@@ -1,0 +1,35 @@
+# @package _global_
+defaults:
+  - override /data: mp-20
+  - override /vae_module: vae_module
+  - override /vae_module/encoder: crystal_transformer
+  - override /callbacks: default
+  - override /logger: wandb
+  - override /scheduler: constant
+  - override /trainer: default
+  - override /paths: default
+  - override /hydra: default
+
+data:
+  dataset:
+    compute_radius_graph: true
+    r_cutoff: 6.0
+    max_neighbors: null
+    compute_edge_vectors: false
+
+trainer:
+  max_epochs: 5000
+
+vae_module:
+  atom_type_predict: true
+  decoder:
+    atom_index_embedding: true # TODO: change to false
+  augmentation:
+    translate: false
+    rotate: false
+
+logger:
+  wandb:
+    name: "vae_dng_crystal_transformer"
+    group: "${task_name}/${data.name}/crystal_transformer"
+    tags: ["vae", "dng", "crystal_transformer"]

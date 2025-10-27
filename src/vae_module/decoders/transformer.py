@@ -51,6 +51,7 @@ class TransformerDecoder(nn.Module):
         norm_first: bool = True,
         bias: bool = True,
         num_layers: int = 6,
+        atom_index_embedding: bool = True,
     ) -> None:
         super().__init__()
 
@@ -58,6 +59,7 @@ class TransformerDecoder(nn.Module):
         self.d_model = d_model
         self.num_layers = num_layers
         self.atom_type_predict = atom_type_predict
+        self.atom_index_embedding = atom_index_embedding
 
         activation = {
             "gelu": nn.GELU(approximate="tanh"),
@@ -99,7 +101,8 @@ class TransformerDecoder(nn.Module):
         x = encoded_batch["x"]
 
         # Positional embedding
-        x += get_index_embedding(encoded_batch["token_idx"], self.d_model)
+        if self.atom_index_embedding:
+            x += get_index_embedding(encoded_batch["token_idx"], self.d_model)
 
         # Convert from PyG batch to dense batch with padding
         x, token_mask = to_dense_batch(x, encoded_batch["batch"])
