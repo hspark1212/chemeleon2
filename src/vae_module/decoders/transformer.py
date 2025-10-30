@@ -81,7 +81,10 @@ class TransformerDecoder(nn.Module):
         )
         if atom_type_predict:
             self.atom_types_head = nn.Linear(d_model, max_num_elements, bias=True)
-        self.frac_coords_head = nn.Linear(d_model, 3, bias=False)
+        self.frac_coords_head = nn.Sequential(
+            nn.Linear(d_model, 3, bias=False),
+            nn.Sigmoid(),
+        )
         self.lattice_head = nn.Linear(d_model, 6, bias=False)
 
     @property

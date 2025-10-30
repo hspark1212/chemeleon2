@@ -156,6 +156,9 @@ class CrystalTransformerEncoder(nn.Module):
             ]
         )
 
+        # Final normalization
+        self.final_norm = nn.LayerNorm(d_model)
+
     @property
     def hidden_dim(self) -> int:
         return self.d_model
@@ -201,6 +204,9 @@ class CrystalTransformerEncoder(nn.Module):
         # Crystal Transformer layers
         for layer in self.layers:
             h_n = layer(h_n, h_e, batch.edge_index)  # (B_n, d)
+
+        # Final normalization
+        h_n = self.final_norm(h_n)
 
         return {
             "x": h_n,
