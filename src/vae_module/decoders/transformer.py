@@ -80,12 +80,25 @@ class TransformerDecoder(nn.Module):
             num_layers=num_layers,
         )
         if atom_type_predict:
-            self.atom_types_head = nn.Linear(d_model, max_num_elements, bias=True)
+            self.atom_types_head = nn.Sequential(
+                nn.LayerNorm(d_model),
+                nn.Linear(d_model, d_model),
+                nn.GELU(),
+                nn.Linear(d_model, max_num_elements),
+            )
         self.frac_coords_head = nn.Sequential(
+            nn.LayerNorm(d_model),
+            nn.Linear(d_model, d_model, bias=False),
+            nn.GELU(),
             nn.Linear(d_model, 3, bias=False),
             nn.Sigmoid(),
         )
-        self.lattice_head = nn.Linear(d_model, 6, bias=False)
+        self.lattice_head = nn.Sequential(
+            nn.LayerNorm(d_model),
+            nn.Linear(d_model, d_model, bias=False),
+            nn.GELU(),
+            nn.Linear(d_model, 6, bias=False),
+        )
 
     @property
     def hidden_dim(self) -> int:
