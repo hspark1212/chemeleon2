@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "chemeleon2"
 version = "0.1.0"
-description = "A generative machine learning framework for crystal structure prediction"
+description = "Generative AI framework for crystalline materials"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

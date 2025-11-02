@@ -4,7 +4,7 @@ A generative machine learning framework for crystals in latent space. It combine
 
 ## Overview
 
-Chameleon2 implements a three-stage pipeline for crystal structure generation:
+Chemeleon2 implements a three-stage pipeline for crystal structure generation:
 
 1. **VAE Module**: Encodes crystal structures into latent space representations
 2. **LDM Module**: Learns to generate in the VAE's latent space using diffusion
@@ -171,7 +171,7 @@ python src/evaluate.py \
 
 ## Configuration
 
-The project uses Hydra for configuration management:
+The project uses [Hydra](https://hydra.cc) for configuration management:
 
 - `configs/experiment/`: Experiment-specific configurations
 - `configs/{data,vae_module,ldm_module,rl_module}/`: Component configurations
@@ -191,4 +191,4 @@ python src/train_ldm.py ckpt_path=/path/to/checkpoint.ckpt
 
 ## Contributing
 
-Welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
