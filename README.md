@@ -4,7 +4,7 @@ A generative machine learning framework for crystal structure generation using V
 
 ## Overview
 
-Chemeleon2 implements a three-stage pipeline:
+Chemeleon2 implements a three-stage pipeline for crystal structure generation:
 
 1. **VAE Module**: Encodes crystal structures into latent space representations
 2. **LDM Module**: Generates structures in latent space using diffusion
@@ -74,4 +74,4 @@ Load them using `from monty.serialization import loadfn`
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development setup and guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
