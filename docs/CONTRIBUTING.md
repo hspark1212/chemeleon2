@@ -87,8 +87,6 @@ pytest -v
 
 ### Workflow Steps
 
-**⚠️ NEVER work directly on `main` branch!**
-
 1. **Create a new branch** for your work
 2. **Make your changes** and commit them
 3. **Push your branch** to GitHub

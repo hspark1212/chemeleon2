@@ -1,25 +1,31 @@
 # Chemeleon2
 
-A generative machine learning framework for crystals in latent space. It combines Variational Autoencoders (VAE), Latent Diffusion Models (LDM), and Reinforcement Learning (RL).
+A generative machine learning framework for crystal structure generation using Variational Autoencoders (VAE), Latent Diffusion Models (LDM), and Reinforcement Learning (RL).
 
 ## Overview
 
-Chameleon2 implements a three-stage pipeline for crystal structure generation:
+Chemeleon2 implements a three-stage pipeline:
 
 1. **VAE Module**: Encodes crystal structures into latent space representations
-2. **LDM Module**: Learns to generate in the VAE's latent space using diffusion
-3. **RL Module**: Fine-tunes the LDM using reinforcement learning with reward functions
+2. **LDM Module**: Generates structures in latent space using diffusion
+3. **RL Module**: Fine-tunes the LDM with reward functions
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/hspark1212/chemeleon2
 cd chemeleon2
 
 # Install dependencies with uv
 uv sync
+```
 
+> **Tip:** `uv sync` installs dependencies based on the `uv.lock` file, ensuring reproducible environments. If you encounter issues with `uv.lock` (e.g., lock file conflicts or compatibility problems), you can use `uv pip install -e .` as an alternative to install the package in editable mode directly from `pyproject.toml`.
+
+### (Optional) Installation with dependency
+
+```bash
 # (Optional) Install development dependencies (pytest, ruff, pyright, etc.)
 uv sync --extra dev
 
@@ -27,7 +33,7 @@ uv sync --extra dev
 uv sync --extra metrics
 ```
 
-## (Optional) Pytorch Installation with CUDA
+### (Optional) Pytorch Installation with CUDA
 
 After completing `uv sync`, install a PyTorch version compatible with your CUDA environment to prevent compatibility issues.
 For version-specific installation commands, visit the [PyTorch official website](https://pytorch.org/get-started/previous-versions/).
@@ -39,156 +45,33 @@ For PyTorch 2.7.0 with CUDA 12.8:
 
 </details>
 
+
 ## Quick Start
 
-### 1. Train VAE (First Stage)
+For a complete walkthrough of sampling and evaluation, see [tutorial.ipynb](./tutorial.ipynb). The tutorial covers:
 
-The VAE encodes crystal structures into a continuous latent space.
+- Generating crystal structures from trained models
+- Evaluating structures with various metrics
+- Analyzing benchmark results
 
-```bash
-# Train VAE on MP-20 dataset
-python src/train_vae.py experiment=mp_20/vae_dng
+## Training
 
-# Override training parameters
-python src/train_vae.py experiment=mp_20/vae_dng trainer.max_epochs=3000 data.batch_size=128
+Chemeleon2 uses a three-stage training pipeline: VAE → LDM → RL.
 
-# Resume from checkpoint
-python src/train_vae.py experiment=mp_20/vae_dng ckpt_path=ckpts/vae_checkpoint.ckpt
-```
+For detailed instructions, see:
 
-<details>
-<summary>VAE experiment examples</summary>
+- [Training Guide](docs/TRAINING.md) - VAE, LDM, RL, and predictor training
+- [Evaluation Guide](docs/EVALUATION.md) - Model evaluation and metrics
 
-- [`mp_20/vae_dng`](configs/experiment/mp_20/vae_dng.yaml) - VAE for de novo generation on MP-20
+## Benchmarks
 
-</details>
+To benchmark de novo generation (DNG), 10,000 sampled structures are available in the `benchmarks/dng/` directory:
 
-### 2. Train LDM (Second Stage - requires trained VAE)
+- **MP-20**: [`chemeleon2_rl_dng_mp_20.json.gz`](benchmarks/dng/chemeleon2_rl_dng_mp_20.json.gz) - 10,000 generated structures using RL-trained model on MP-20
+- **Alex-MP-20**: [`chemeleon2_rl_dng_alex_mp_20.json.gz`](benchmarks/dng/chemeleon2_rl_dng_alex_mp_20.json.gz) - 10,000 generated structures using RL-trained model on Alex-MP-20
 
-The LDM learns to generate structures in the VAE's latent space using diffusion models.
-
-```bash
-# Train unconditional LDM (null condition)
-python src/train_ldm.py experiment=mp_20/ldm_null
-
-# Train composition-conditioned LDM
-python src/train_ldm.py experiment=mp_20/ldm_composition
-
-# Override checkpoint path and training parameters
-python src/train_ldm.py experiment=mp_20/ldm_null \
-    ldm_module.vae_ckpt_path=ckpts/my_vae.ckpt \
-    trainer.max_epochs=500
-
-# Fine-tune with LoRA
-python src/train_ldm.py experiment=alex_mp_20_bandgap/ldm_bandgap_lora
-```
-
-<details>
-<summary>LDM experiment examples</summary>
-
-**Unconditional generation:**
-- [`mp_20/ldm_null`](configs/experiment/mp_20/ldm_null.yaml) - Unconditional generation on MP-20
-
-**Conditional generation:**
-- [`mp_20/ldm_composition`](configs/experiment/mp_20/ldm_composition.yaml) - Conditioned on chemical composition
-- [`alex_mp_20_bandgap/ldm_bandgap`](configs/experiment/alex_mp_20_bandgap/ldm_bandgap.yaml) - Conditioned on band gap values
-
-**LoRA fine-tuning:**
-- [`alex_mp_20_bandgap/ldm_bandgap_lora`](configs/experiment/alex_mp_20_bandgap/ldm_bandgap_lora.yaml) - LoRA fine-tuning for band gap
-
-</details>
-
-### 3. Train RL (Third Stage - requires trained LDM)
-
-The RL module fine-tunes the LDM using reinforcement learning with reward functions.
-
-```bash
-# Fine-tune with de novo generation reward
-python src/train_rl.py experiment=mp_20/rl_dng
-
-# Fine-tune for band gap optimization
-python src/train_rl.py experiment=alex_mp_20_bandgap/rl_bandgap
-
-# Override RL hyperparameters
-python src/train_rl.py experiment=mp_20/rl_dng \
-    rl_module.ldm_ckpt_path=ckpts/my_ldm.ckpt \
-    rl_module.rl_configs.num_group_samples=128 \
-    data.batch_size=8
-```
-
-<details>
-<summary>RL experiment examples</summary>
-
-- [`mp_20/rl_dng`](configs/experiment/mp_20/rl_dng.yaml) - De novo generation reward
-- [`alex_mp_20_bandgap/rl_bandgap`](configs/experiment/alex_mp_20_bandgap/rl_bandgap.yaml) - Band gap optimization
-
-</details>
-
-### 4. Train Predictor (Optional)
-
-Train a property predictor on the VAE's latent space for conditional generation.
-
-```bash
-# Train band gap predictor
-python src/train_predictor.py experiment=alex_mp_20_bandgap/predictor_dft_band_gap
-
-# Override predictor parameters
-python src/train_predictor.py experiment=alex_mp_20_bandgap/predictor_dft_band_gap \
-    predictor_module.vae.checkpoint_path=ckpts/my_vae.ckpt \
-    data.batch_size=512
-```
-
-### 5. Generate Samples
-
-Generate crystal structures using a trained LDM model.
-
-```bash
-# Generate 10000 samples with 2000 batch size using DDIM sampler
-python src/sample.py --num_samples=10000 --batch_size=2000
-```
-
-</details>
-
-### 6. Evaluate Models
-
-Evaluate generated structures against reference datasets.
-
-```bash
-# Evaluate pre-generated structures
-python src/evaluate.py \
-    --structure_path=outputs/dng_samples \
-    --reference_dataset=mp-20 \
-    --output_file=benchmark/results/my_results.csv
-
-# Generate and evaluate in one command
-python src/evaluate.py \
-    --model_path=ckpts/mp_20/ldm/ldm_null.ckpt \
-    --structure_path=outputs/eval_samples \
-    --reference_dataset=mp-20 \
-    --num_samples=10000 \
-    --batch_size=2000 \
-```
-
-## Configuration
-
-The project uses Hydra for configuration management:
-
-- `configs/experiment/`: Experiment-specific configurations
-- `configs/{data,vae_module,ldm_module,rl_module}/`: Component configurations
-- `configs/{trainer,logger,callbacks}/`: Training infrastructure
-
-### Example: Override parameters
-
-```bash
-python src/train_ldm.py trainer.max_epochs=100 data.batch_size=32
-```
-
-### Example: Resume from checkpoint
-
-```bash
-python src/train_ldm.py ckpt_path=/path/to/checkpoint.ckpt
-```
+Load them using `from monty.serialization import loadfn`
 
 ## Contributing
 
-Welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
+Contributions are welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development setup and guidelines.

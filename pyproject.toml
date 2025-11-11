@@ -99,6 +99,7 @@ ignore = [
     "ANN202",  # Missing return type annotation for private function
     "ANN204",  # Missing return type annotation for __init__
     "ANN205",  # Missing return type annotation for static method
+    "B028",    # No explicit `stacklevel` keyword argument found
     "D102",    # Missing docstring in public method
     "D103",    # Missing docstring in public function
     "D105",    # Missing docstring in magic method

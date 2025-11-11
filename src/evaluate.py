@@ -33,7 +33,7 @@ def evaluate(
     if model_path is not None:
         print(f"Using model from {model_path} for sampling structures.")
         sample(
-            model_path=model_path,
+            ldm_ckpt_path=model_path,
             output_dir=structure_path,
             **sample_configs,
         )

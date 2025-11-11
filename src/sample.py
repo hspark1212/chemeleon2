@@ -1,5 +1,6 @@
 """Sampling script for generating crystal structures from trained models."""
 
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -11,16 +12,17 @@ from pymatgen.core import Composition, Structure
 from src.data.num_atom_distributions import NUM_ATOM_DISTRIBUTIONS
 from src.data.schema import create_empty_batch
 from src.ldm_module.ldm_module import LDMModule
-from src.paths import DEFAULT_LDM_CKPT_PATH
+from src.paths import DEFAULT_LDM_CKPT_PATH, DEFAULT_VAE_CKPT_PATH
 
 
 def sample(
     num_samples: int = 10000,
     batch_size: int = 2000,
-    compositions: list | None = None,
-    text_prompts: list | None = None,
+    compositions: list | None = None,  # TODO: add feature in future
+    text_prompts: list | None = None,  # TODO: add feature in future
     num_atom_distribution: str = "mp-20",
-    model_path: str | Path | None = None,
+    ldm_ckpt_path: str | Path | None = None,
+    vae_ckpt_path: str | Path | None = None,
     output_dir: str = "outputs",
     sampler: str = "ddim",
     sampling_steps: int = 50,
@@ -40,10 +42,11 @@ def sample(
         If provided, performs the CSP task, defaults to None
     :param text_prompts: List of text prompts to generate structures for.
         If provided, performs the TSP task, defaults to None
-    :param num_atom_distribution: Name of the atom number distribution to use (e.g., "mp-20"),
-        defaults to "mp-20"
-    :param model_path: Path to the pre-trained LDM model checkpoint.
-        If None, uses `DEFAULT_MODEL_PATH`, defaults to None
+    :param num_atom_distribution: Name of the atom number distribution to use (e.g., "mp-20").
+    :param ldm_ckpt_path: Path to the pre-trained LDM model checkpoint.
+        If None, uses `DEFAULT_LDM_CKPT_PATH`, defaults to None
+    :param vae_ckpt_path: Path to the pre-trained VAE model checkpoint.
+        If None, uses `DEFAULT_VAE_CKPT_PATH`, defaults to None
     :param output_dir: Directory to save the generated CIF files and JSON summary,
         defaults to "outputs"
     :param sampler: Sampler to use for generating samples ("ddpm" or "ddim"), defaults to "ddim"
@@ -53,6 +56,8 @@ def sample(
         If None, automatically detects CUDA availability, defaults to None
     :param save_json: Whether to save all generated structures in a single JSON.gz file,
         defaults to True
+
+    :return: List of generated structures as ASE Atoms objects
 
     Examples\n
     --------
@@ -73,9 +78,20 @@ def sample(
     print(f"Using device: {device}")
 
     # Set default checkpoint path if not provided
-    if model_path is None:
-        model_path = DEFAULT_LDM_CKPT_PATH
-    print(f"Using checkpoint path: {model_path}")
+    if ldm_ckpt_path is None and vae_ckpt_path is None:
+        ldm_ckpt_path = DEFAULT_LDM_CKPT_PATH
+        vae_ckpt_path = DEFAULT_VAE_CKPT_PATH
+    assert ldm_ckpt_path is not None, "LDM checkpoint path must be provided."
+
+    # Load the model
+    if vae_ckpt_path is not None:
+        ldm_module = LDMModule.load_from_checkpoint(
+            ldm_ckpt_path, vae_ckpt_path=vae_ckpt_path, map_location=device
+        )
+    else:
+        ldm_module = LDMModule.load_from_checkpoint(ldm_ckpt_path, map_location=device)
+    ldm_module.eval()
+    print(f"Loaded model from {ldm_ckpt_path}")
 
     # CSP task
     if compositions is not None:
@@ -96,14 +112,19 @@ def sample(
     total_num_samples = len(num_atoms)
     batch_size = min(batch_size, total_num_samples)
 
-    # Load the model
-    ldm_module = LDMModule.load_from_checkpoint(model_path, map_location=device)
-    ldm_module.eval()
-    print(f"Loaded model from {model_path}")
-
     # Set output directory
     output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
+    if output_path.exists():
+        # Find any cif files in the output directory
+        existing_cif_files = list(output_path.glob("sample_*.cif"))
+        if existing_cif_files:
+            warnings.warn(
+                f"Output directory '{output_path}' already exists and contains {len(existing_cif_files)} CIF files. "
+                "New samples will be generated alongside existing files.",
+                UserWarning,
+            )
+    else:
+        output_path.mkdir(parents=True, exist_ok=True)
     print(f"The sampled cif files will be saved in directory: '{output_path}'")
 
     # Sample
@@ -129,7 +150,6 @@ def sample(
         # Save generated structures
         assert isinstance(gen_st_list, list)
         for j, st in enumerate(gen_st_list):
-            # st is a pymatgen Structure object
             st.to(  # type: ignore[attr-defined]
                 filename=str(
                     output_path / f"sample_{i + j}_{st.formula.replace(' ', '')}.cif"  # type: ignore[attr-defined]

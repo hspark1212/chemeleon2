@@ -2,6 +2,12 @@
 
 from src.utils.checkpoint_downloader import get_checkpoint
 
-# Default checkpoints - always from HF Hub
+# Default checkpoints
 DEFAULT_VAE_CKPT_PATH = get_checkpoint("alex_mp_20_vae")
 DEFAULT_LDM_CKPT_PATH = get_checkpoint("alex_mp_20_ldm")
+
+# Model checkpoints
+MP_20_VAE_CKPT_PATH = get_checkpoint("mp_20_vae")
+MP_20_LDM_CKPT_PATH = get_checkpoint("mp_20_ldm")
+ALEX_MP_20_VAE_CKPT_PATH = get_checkpoint("alex_mp_20_vae")
+ALEX_MP_20_LDM_CKPT_PATH = get_checkpoint("alex_mp_20_ldm")
