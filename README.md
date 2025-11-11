@@ -12,7 +12,7 @@ A reinforcement learning framework in latent diffusion models for crystal struct
 Chemeleon2 implements a three-stage pipeline for crystal structure generation:
 
 1. **VAE Module**: Encodes crystal structures into latent space representations
-2. **LDM Module**: Generates structures in latent space using diffusion
+2. **LDM Module**: Samples crystal structures in latent space using diffusion Transformer
 3. **RL Module**: Fine-tunes the LDM with reward functions
 
 <p align="center">
@@ -47,12 +47,10 @@ uv sync --extra metrics
 After completing `uv sync`, install a PyTorch version compatible with your CUDA environment to prevent compatibility issues.
 For version-specific installation commands, visit the [PyTorch official website](https://pytorch.org/get-started/previous-versions/).
 
-<details>
-<summary> Example </summary>
-For PyTorch 2.7.0 with CUDA 12.8:
-<pre><code>uv pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128</code></pre>
-
-</details>
+```bash
+# (Optional) Example command for for PyTorch 2.7.0 with CUDA 12.8
+uv pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
+```
 
 ## Quick Start
 
@@ -78,3 +76,30 @@ The compressed json files can be load them using `from monty.serialization impor
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed setup instructions, development workflow, and guidelines.
+
+## BibTex
+
+```plain
+@article{Park2025chemeleon2,
+  title={Guiding Generative Models to Uncover Diverse and Novel Crystals via Reinforcement Learning},
+  author={Hyunsoo Park and Aron Walsh},
+  year={2025},
+  url={https://arxiv.org/abs/2511.07158}
+}
+```
+
+## References
+
+This work is inspired by the following projects:
+
+1. https://github.com/facebookresearch/DiT
+
+2. https://github.com/facebookresearch/all-atom-diffusion-transformer
+
+3. https://github.com/kvablack/ddpo-pytorch
+
+4. https://github.com/open-thought/tiny-grpo
+
+## License
+
+Chemeleon2 is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
