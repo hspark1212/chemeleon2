@@ -160,6 +160,13 @@ The project uses Hydra for configuration management. You can override any parame
 python src/train_ldm.py trainer.max_epochs=100 data.batch_size=32 ldm_module.vae_ckpt_path='${hub:mp_20_vae}'
 ```
 
+### Check resolved configuration
+
+```bash
+# View the fully resolved config without running training
+python src/train_ldm.py experiment=mp_20/ldm_null --cfg job
+```
+
 ### Configuration file structure
 
 - `configs/experiment/`: Experiment-specific configurations

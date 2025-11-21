@@ -1,4 +1,5 @@
 # @package _global_
+# GRPO for DNG on ALEX-MP-20
 defaults:
   - override /data: alex_mp_20
   - override /rl_module: rl_module
@@ -20,8 +21,23 @@ rl_module:
     group_reward_norm: true
 
   reward_fn:
-    reward_type: dng
-    reference_dataset: alex-mp-20
+    _target_: src.rl_module.reward.ReinforceReward
+    normalize_fn: std
+    eps: 1e-4
+    reference_dataset: mp-20
+    components:
+      - _target_: src.rl_module.components.CreativityReward
+        weight: 1.0
+        normalize_fn: null
+      - _target_: src.rl_module.components.EnergyReward
+        weight: 1.0
+        normalize_fn: norm
+      - _target_: src.rl_module.components.StructureDiversityReward
+        weight: 0.1
+        normalize_fn: norm
+      - _target_: src.rl_module.components.CompositionDiversityReward
+        weight: 1.0
+        normalize_fn: norm
 
 logger:
   wandb:

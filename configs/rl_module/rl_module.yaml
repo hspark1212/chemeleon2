@@ -1,19 +1,37 @@
 _target_: src.rl_module.rl_module.RLModule
 
-ldm_ckpt_path: path/to/ckpts
+ldm_ckpt_path: ${hub:mp_20_ldm}
+vae_ckpt_path: ${hub:mp_20_vae}
 
+# Default: Reinforce (without group normalization)
 rl_configs:
   clip_ratio: 0.001
   kl_weight: 1.0
   entropy_weight: 1e-5
   num_group_samples: 1
-  group_reward_norm: true
+  group_reward_norm: false
   num_inner_batch: 2
 
+# Reward function configuration
+# Default: DNG reward
 reward_fn:
   _target_: src.rl_module.reward.ReinforceReward
-  reward_type: dng
   normalize_fn: std
+  eps: 1e-4
+  reference_dataset: mp-20
+  components:
+    - _target_: src.rl_module.components.CreativityReward
+      weight: 1.0
+      normalize_fn: null
+    - _target_: src.rl_module.components.EnergyReward
+      weight: 1.0
+      normalize_fn: norm
+    - _target_: src.rl_module.components.StructureDiversityReward
+      weight: 0.1
+      normalize_fn: norm
+    - _target_: src.rl_module.components.CompositionDiversityReward
+      weight: 1.0
+      normalize_fn: norm
 
 sampling_configs:
   sampler: ddim

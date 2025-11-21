@@ -1,5 +1,6 @@
 # @package _global_
 defaults:
+  - override /data: mp-20
   - override /rl_module: rl_module
   - override /callbacks: default
   - override /logger: wandb
@@ -8,26 +9,13 @@ defaults:
   - override /hydra: default
 
 data:
-  _target_: src.data.datamodule.DataModule
-  data_dir: ${paths.data_dir}/alex_mp_20_bandgap
   batch_size: 5
-  dataset_type: "alex_mp_20_bandgap"
-  target_condition: dft_band_gap
-  mace_features: false
-  num_workers: 16
-  pin_memory: false
-
-trainer:
-  max_steps: 1000
-  # strategy: ddp_find_unused_parameters_true
 
 rl_module:
-  ldm_ckpt_path: ${hub:alex_mp_20_ldm}
-  vae_ckpt_path: ${hub:alex_mp_20_vae}
+  ldm_ckpt_path: ${hub:mp_20_ldm}
+  vae_ckpt_path: ${hub:mp_20_vae}
 
   rl_configs:
-    clip_ratio: 0.0001
-    kl_weight: 1.0
     num_group_samples: 64
     group_reward_norm: true
 
@@ -35,7 +23,7 @@ rl_module:
     _target_: src.rl_module.reward.ReinforceReward
     normalize_fn: std
     eps: 1e-4
-    reference_dataset: alex-mp-20
+    reference_dataset: mp-20
     components:
       - _target_: src.rl_module.components.PredictorReward
         weight: 1.0
@@ -50,12 +38,6 @@ rl_module:
       - _target_: src.rl_module.components.CompositionDiversityReward
         weight: 0.5
         normalize_fn: norm
-
-callbacks:
-  early_stopping:
-    monitor: "val/reward"
-    patience: 10
-    mode: "max"
 
 logger:
   wandb:
