@@ -7,4 +7,4 @@ AVAIL_CHECKPOINTS = ", ".join(config["checkpoints"].keys())
 
 # Default checkpoints
 DEFAULT_VAE_CKPT_PATH = get_checkpoint("alex_mp_20_vae")
-DEFAULT_LDM_CKPT_PATH = get_checkpoint("alex_mp_20_ldm")
+DEFAULT_LDM_CKPT_PATH = get_checkpoint("alex_mp_20_ldm_rl")

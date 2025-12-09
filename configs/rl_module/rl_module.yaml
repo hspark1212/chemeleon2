@@ -1,6 +1,6 @@
 _target_: src.rl_module.rl_module.RLModule
 
-ldm_ckpt_path: ${hub:mp_20_ldm}
+ldm_ckpt_path: ${hub:mp_20_ldm_base}
 vae_ckpt_path: ${hub:mp_20_vae}
 
 # Default: Reinforce (without group normalization)

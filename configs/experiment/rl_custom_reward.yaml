@@ -7,7 +7,7 @@
 #
 # Available checkpoint names (see checkpoints/checkpoints.yaml):
 #   - mp_20_vae, alex_mp_20_vae
-#   - mp_20_ldm, alex_mp_20_ldm
+#   - mp_20_ldm_base, mp_20_ldm_rl, alex_mp_20_ldm_base, alex_mp_20_ldm_rl
 
 defaults:
   - override /data: alex_mp_20
@@ -23,7 +23,7 @@ data:
 
 rl_module:
   # Use hub: resolver to automatically download checkpoints from HuggingFace
-  ldm_ckpt_path: ${hub:alex_mp_20_ldm}
+  ldm_ckpt_path: ${hub:alex_mp_20_ldm_rl}
   vae_ckpt_path: ${hub:alex_mp_20_vae}
 
   # Alternative: Use direct file paths (if checkpoints are already downloaded)

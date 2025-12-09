@@ -13,7 +13,7 @@ data:
   batch_size: 5
 
 rl_module:
-  ldm_ckpt_path: ${hub:mp_20_ldm}
+  ldm_ckpt_path: ${hub:mp_20_ldm_base}
   vae_ckpt_path: ${hub:mp_20_vae}
 
   rl_configs:
