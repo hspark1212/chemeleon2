@@ -6,7 +6,6 @@ from functools import partial
 
 import torch
 from lightning import LightningModule
-from peft import LoraConfig, get_peft_model
 from torch_geometric.utils import to_dense_batch
 
 from src.data.data_augmentation import apply_augmentation
@@ -75,6 +74,8 @@ class LDMModule(LightningModule):
 
         #  Lora
         if lora_configs is not None:
+            from peft import LoraConfig, get_peft_model
+
             self.lora_configs = LoraConfig(**lora_configs)
             self.denoiser = get_peft_model(self.denoiser, self.lora_configs)
             self.denoiser.print_trainable_parameters()
