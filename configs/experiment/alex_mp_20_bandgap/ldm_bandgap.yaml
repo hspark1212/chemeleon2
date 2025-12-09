@@ -1,12 +1,6 @@
 # @package _global_
-defaults:
-  - override /ldm_module: ldm_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
+# LDM training with bandgap conditioning on Alex-MP-20-Bandgap
+# Inherits most defaults from train_ldm.yaml, but defines custom data config inline
 
 data:
   _target_: src.data.datamodule.DataModule

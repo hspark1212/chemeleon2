@@ -1,13 +1,6 @@
 # @package _global_
 # GRPO for DNG on MP-20
-defaults:
-  - override /data: mp-20
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
+# Inherits all defaults from train_rl.yaml
 
 data:
   batch_size: 5

@@ -1,12 +1,6 @@
 # @package _global_
-defaults:
-  - override /data: mp-20
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
+# RL training for bandgap optimization on MP-20
+# Inherits all defaults from train_rl.yaml
 
 data:
   batch_size: 5

@@ -1,11 +1,6 @@
 # @package _global_
-defaults:
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
+# RL training for bandgap optimization on Alex-MP-20-Bandgap
+# Inherits most defaults from train_rl.yaml, but defines custom data config inline
 
 data:
   _target_: src.data.datamodule.DataModule

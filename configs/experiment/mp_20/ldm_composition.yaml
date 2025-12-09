@@ -1,13 +1,6 @@
 # @package _global_
-defaults:
-  - override /data: mp-20
-  - override /ldm_module: ldm_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
+# LDM training with composition conditioning on MP-20
+# Inherits all defaults from train_ldm.yaml
 
 ldm_module:
   vae_ckpt_path: ${hub:mp_20_vae}

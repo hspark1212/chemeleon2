@@ -1,13 +1,6 @@
 # @package _global_
-defaults:
-  - override /data: mp-20
-  - override /vae_module: vae_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
+# VAE training for CSP (no atom type prediction) on MP-20
+# Inherits all defaults from train_vae.yaml
 
 trainer:
   max_epochs: 5000

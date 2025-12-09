@@ -1,13 +1,9 @@
 # @package _global_
 # GRPO for DNG on ALEX-MP-20
+# Changes from train_rl.yaml: data -> alex_mp_20
+
 defaults:
   - override /data: alex_mp_20
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
 
 data:
   batch_size: 5
