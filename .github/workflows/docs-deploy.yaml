@@ -1,0 +1,64 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - feat/custom-reward-001  # TODO: REMOVE THIS BRANCH AFTER MERGING TO MAIN
+      - feat/custom-reward-001-docs  # TODO: REMOVE THIS BRANCH AFTER MERGING TO MAIN
+    paths:
+      - 'docs/**'
+      - 'src/**/*.py'
+      - '.github/workflows/docs-deploy.yaml'
+
+# Sets permissions for GITHUB_TOKEN for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jupyter-book myst-nb sphinx-design sphinxcontrib-mermaid
+
+      - name: Build documentation
+        working-directory: docs
+        run: jupyter-book build --html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+
+  deploy:
+    # TODO: RESTORE THIS AFTER DEBUGGING - Only deploy on push to main (not on PRs)
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # TEMPORARY: Allow deployment from feat branches for debugging
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
