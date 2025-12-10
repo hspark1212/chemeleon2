@@ -2,14 +2,7 @@
 
 This guide covers evaluating generated crystal structures against reference datasets to assess quality and diversity.
 
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Generate Samples](#generate-samples)
-- [Evaluate Models](#evaluate-models)
-- [Evaluation Metrics](#evaluation-metrics)
-- [Benchmarks for Chemeleon2 DNG](#benchmarks-for-chemeleon2-dng)
-
+(prerequisites)=
 ## Prerequisites
 
 Before running evaluation metrics, you need to download and extract the reference dataset.
@@ -44,16 +37,17 @@ benchmarks/
 
 These files contain the reference data required for computing evaluation metrics against the MP-20 dataset.
 
+(generate-samples)=
 ## Generate Samples
 
 Generate crystal structures using a pre-trained LDM model. (Default model is trained on alex-mp-20 dataset.)
 
 ```bash
 # Generate 10000 samples with 2000 batch size using DDIM sampler
-python src/sample.py --num_samples=10000 --batch_size=2000 --output_dir=outputs/samples 
+python src/sample.py --num_samples=10000 --batch_size=2000 --output_dir=outputs/samples
 ```
 
-
+(evaluate-models)=
 ## Evaluate Models
 
 Evaluate generated structures against reference datasets (i.e., MP-20, Alex-MP-20) to assess quality and diversity.
@@ -82,6 +76,7 @@ python src/evaluate.py \
     --output_file=benchmark/results/my_results.csv
 ```
 
+(evaluation-metrics)=
 ## Evaluation Metrics
 
 The evaluation script computes several metrics to assess generation quality:
@@ -94,7 +89,7 @@ The evaluation script computes several metrics to assess generation quality:
 - **Composition Diversity**: Computes inverse Fréchet distance (1/(1+FMD)) between generated and reference composition embeddings from VAE (higher is better)
 - **Synthesizability**: Predicts synthesizability using CL-score (optional)
 
-For detailed implementation, see [`src/utils/metrics.py`](../src/utils/metrics.py).
+For detailed implementation, see `src/utils/metrics.py`.
 
 ### Python API Usage
 
@@ -136,12 +131,13 @@ Available reference datasets:
 
 Results are saved to the specified output file in CSV format for further analysis.
 
+(benchmarks)=
 ## Benchmarks for Chemeleon2 DNG
 
 Pre-computed benchmark results for de novo generation (DNG) are available in the `benchmarks/dng/` directory:
 
-- **MP-20**: [`chemeleon2_rl_dng_mp_20.json.gz`](../benchmarks/dng/chemeleon2_rl_dng_mp_20.json.gz) - 10,000 generated structures using RL-trained model on MP-20
-- **Alex-MP-20**: [`chemeleon2_rl_dng_alex_mp_20.json.gz`](../benchmarks/dng/chemeleon2_rl_dng_alex_mp_20.json.gz) - 10,000 generated structures using RL-trained model on Alex-MP-20
+- **MP-20**: `benchmarks/dng/chemeleon2_rl_dng_mp_20.json.gz` - 10,000 generated structures using RL-trained model on MP-20
+- **Alex-MP-20**: `benchmarks/dng/chemeleon2_rl_dng_alex_mp_20.json.gz` - 10,000 generated structures using RL-trained model on Alex-MP-20
 
 ### Loading Benchmark Data
 

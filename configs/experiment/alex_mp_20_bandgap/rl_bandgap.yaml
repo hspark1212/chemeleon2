@@ -1,11 +1,6 @@
 # @package _global_
-defaults:
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
+# RL training for bandgap optimization on Alex-MP-20-Bandgap
+# Inherits most defaults from train_rl.yaml, but defines custom data config inline
 
 data:
   _target_: src.data.datamodule.DataModule
@@ -22,7 +17,7 @@ trainer:
   # strategy: ddp_find_unused_parameters_true
 
 rl_module:
-  ldm_ckpt_path: ${hub:alex_mp_20_ldm}
+  ldm_ckpt_path: ${hub:alex_mp_20_ldm_rl}
   vae_ckpt_path: ${hub:alex_mp_20_vae}
 
   rl_configs:
@@ -32,12 +27,24 @@ rl_module:
     group_reward_norm: true
 
   reward_fn:
-    reward_type: bandgap
-    predictor:
-      _target_: src.vae_module.predictor_module.PredictorModule.load_from_checkpoint
-      checkpoint_path: "ckpts/alex_mp_20_bandgap/predictor/predictor_dft_band_gap_e8mhs4yg.ckpt"
-      map_location: "cpu"
-    target_bandgap: 3.0
+    _target_: src.rl_module.reward.ReinforceReward
+    normalize_fn: std
+    eps: 1e-4
+    reference_dataset: alex-mp-20
+    components:
+      - _target_: src.rl_module.components.PredictorReward
+        weight: 1.0
+        normalize_fn: norm
+        predictor:
+          _target_: src.vae_module.predictor_module.PredictorModule.load_from_checkpoint
+          checkpoint_path: "ckpts/alex_mp_20_bandgap/predictor/predictor_dft_band_gap_e8mhs4yg.ckpt"
+          map_location: "cpu"
+        target_name: dft_band_gap
+        target_value: 3.0
+        clip_min: 0.0
+      - _target_: src.rl_module.components.CompositionDiversityReward
+        weight: 0.5
+        normalize_fn: norm
 
 callbacks:
   early_stopping:

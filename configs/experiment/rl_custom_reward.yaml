@@ -7,26 +7,20 @@
 #
 # Available checkpoint names (see checkpoints/checkpoints.yaml):
 #   - mp_20_vae, alex_mp_20_vae
-#   - mp_20_ldm, alex_mp_20_ldm
+#   - mp_20_ldm_base, mp_20_ldm_rl, alex_mp_20_ldm_base, alex_mp_20_ldm_rl
 
-defaults:
-  - override /data: alex_mp_20
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
 
 data:
+  data_dir: ${paths.data_dir}/mp-20
   batch_size: 5
 
 rl_module:
   # Use hub: resolver to automatically download checkpoints from HuggingFace
-  ldm_ckpt_path: ${hub:alex_mp_20_ldm}
+  ldm_ckpt_path: ${hub:alex_mp_20_ldm_rl}
   vae_ckpt_path: ${hub:alex_mp_20_vae}
 
   # Alternative: Use direct file paths (if checkpoints are already downloaded)
+  # Example:
   # ldm_ckpt_path: ckpts/alex_mp_20/ldm/ldm_null_k744ob4i.ckpt
   # vae_ckpt_path: ckpts/alex_mp_20/vae/dng_j1jgz9t0_v1.ckpt
 
@@ -35,8 +29,23 @@ rl_module:
     group_reward_norm: true
 
   reward_fn:
-    reward_type: dng
-    reference_dataset: alex-mp-20
+    _target_: src.rl_module.reward.ReinforceReward
+    normalize_fn: std
+    eps: 1e-4
+    reference_dataset: mp-20
+    components:
+      - _target_: src.rl_module.components.CreativityReward
+        weight: 1.0
+        normalize_fn: null
+      - _target_: src.rl_module.components.EnergyReward
+        weight: 1.0
+        normalize_fn: norm
+      - _target_: src.rl_module.components.StructureDiversityReward
+        weight: 0.1
+        normalize_fn: norm
+      - _target_: src.rl_module.components.CompositionDiversityReward
+        weight: 1.0
+        normalize_fn: norm
 
 logger:
   wandb:

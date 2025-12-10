@@ -30,7 +30,7 @@ def main(cfg: DictConfig) -> None:
     if cfg.get("ckpt_path"):
         ckpt_path = str(resolve_checkpoint_path(cfg.ckpt_path))
         print(f"Loading model from checkpoint: {ckpt_path}")
-        model: VAEModule = VAEModule.load_from_checkpoint(ckpt_path)
+        model: VAEModule = VAEModule.load_from_checkpoint(ckpt_path, weights_only=False)
     else:
         model: VAEModule = hydra.utils.instantiate(cfg.vae_module)
 

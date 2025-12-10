@@ -18,13 +18,24 @@ checkpoints:
     hf_path: v0.0.1/alex_mp_20/vae/dng_j1jgz9t0_v1.ckpt
     description: "VAE model trained on Alex MP-20 dataset"
 
-  # LDM Models
-  mp_20_ldm:
+  # LDM Models (base)
+  mp_20_ldm_base:
+    filename: ldm_null_4tfw67aq.ckpt
+    hf_path: v0.0.1/mp_20/ldm/ldm_null_4tfw67aq.ckpt
+    description: "LDM model trained on MP-20 dataset"
+
+  alex_mp_20_ldm_base:
+    filename: ldm_null_k744ob4i.ckpt
+    hf_path: v0.0.1/alex_mp_20/ldm/ldm_null_k744ob4i.ckpt
+    description: "LDM model trained on Alex MP-20 dataset"
+
+  # LDM Models (RL fine-tuned)
+  mp_20_ldm_rl:
     filename: ldm_rl_dng_xxq3a0mn.ckpt
     hf_path: v0.0.1/mp_20/ldm/ldm_rl_dng_xxq3a0mn.ckpt
     description: "LDM model trained on MP-20 dataset with RL fine-tuning"
 
-  alex_mp_20_ldm:
+  alex_mp_20_ldm_rl:
     filename: ldm_rl_dng_tuor5vgd.ckpt
     hf_path: v0.0.1/alex_mp_20/ldm/ldm_rl_dng_tuor5vgd.ckpt
     description: "LDM model trained on Alex MP-20 dataset with RL fine-tuning"

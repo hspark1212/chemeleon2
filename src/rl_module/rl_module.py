@@ -44,7 +44,7 @@ class RLModule(LightningModule):
 
         # Load pre-trained LDM (Freeze VAE and condition embedding)
         self.ldm = LDMModule.load_from_checkpoint(
-            ldm_ckpt_path, vae_ckpt_path=vae_ckpt_path
+            ldm_ckpt_path, vae_ckpt_path=vae_ckpt_path, weights_only=False
         )
         print(f"Loaded LDM from {ldm_ckpt_path}")
         self.ldm.vae.eval()

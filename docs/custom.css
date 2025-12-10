@@ -1,0 +1,4 @@
+/* Hide "Made with MyST" badge in footer */
+a[href="https://mystmd.org/made-with-myst"] {
+  display: none !important;
+}

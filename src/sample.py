@@ -87,10 +87,15 @@ def sample(
     # Load the model
     if vae_ckpt_path is not None:
         ldm_module = LDMModule.load_from_checkpoint(
-            ldm_ckpt_path, vae_ckpt_path=vae_ckpt_path, map_location=device
+            ldm_ckpt_path,
+            vae_ckpt_path=vae_ckpt_path,
+            map_location=device,
+            weights_only=False,
         )
     else:
-        ldm_module = LDMModule.load_from_checkpoint(ldm_ckpt_path, map_location=device)
+        ldm_module = LDMModule.load_from_checkpoint(
+            ldm_ckpt_path, map_location=device, weights_only=False
+        )
     ldm_module.eval()
     print(f"Loaded model from {ldm_ckpt_path}")
 

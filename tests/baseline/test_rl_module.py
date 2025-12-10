@@ -12,6 +12,7 @@ import torch.nn as nn
 from omegaconf import OmegaConf
 
 from src.paths import DEFAULT_LDM_CKPT_PATH, DEFAULT_VAE_CKPT_PATH
+from src.rl_module.components import CustomReward
 from src.rl_module.reward import ReinforceReward
 from src.rl_module.rl_module import RLModule
 
@@ -25,7 +26,7 @@ def rl_model(device):
     """
     # Create reward function with minimal configuration
     reward_fn = ReinforceReward(
-        reward_type="custom",
+        components=[CustomReward(weight=1.0)],
         normalize_fn="norm",
         eps=1e-4,
     )

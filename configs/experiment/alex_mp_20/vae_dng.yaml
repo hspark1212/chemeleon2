@@ -1,13 +1,9 @@
 # @package _global_
+# VAE training for DNG (with atom type prediction) on Alex-MP-20
+# Changes from train_vae.yaml: data -> alex_mp_20
+
 defaults:
   - override /data: alex_mp_20
-  - override /vae_module: vae_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
 
 trainer:
   max_epochs: 5000

@@ -4,15 +4,16 @@ Welcome to the chemeleon2 project! This guide will help you set up your developm
 
 ## Table of Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Setup Instructions](#2-setup-instructions)
-3. [Git Workflow](#3-git-workflow)
-4. [Development Workflow](#4-development-workflow)
-5. [Testing](#5-testing)
-6. [Troubleshooting](#6-troubleshooting)
+1. [Prerequisites](#prerequisites-section)
+2. [Setup Instructions](#setup-section)
+3. [Git Workflow](#git-workflow-section)
+4. [Development Workflow](#dev-workflow-section)
+5. [Testing](#testing-section)
+6. [Troubleshooting](#troubleshooting-section)
 
 ---
 
+(prerequisites-section)=
 ## 1. Prerequisites
 
 Before starting, ensure you have:
@@ -30,6 +31,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ---
 
+(setup-section)=
 ## 2. Setup Instructions
 
 ### Step 1: Clone the Repository
@@ -75,6 +77,7 @@ pytest -v
 
 ---
 
+(git-workflow-section)=
 ## 3. Git Workflow
 
 ### Key Concepts
@@ -127,6 +130,7 @@ git push
 
 ---
 
+(dev-workflow-section)=
 ## 4. Development Workflow
 
 ### Making Changes
@@ -184,6 +188,7 @@ Use conventional commit format:
 
 ---
 
+(testing-section)=
 ## 5. Testing
 
 ### Running Tests
@@ -228,6 +233,7 @@ Hooks run automatically on `git commit`. To run manually:
 
 ---
 
+(troubleshooting-section)=
 ## 6. Troubleshooting
 
 ### Pre-commit Hooks Not Running
@@ -240,20 +246,35 @@ Hooks run automatically on `git commit`. To run manually:
 
 ### Import Errors
 
+If you encounter import errors, reinstall the package in editable mode:
+
 ```bash
-# Reinstall in editable mode
+# Using uv sync (recommended)
+uv sync --extra dev
+
+# Or using uv pip
+source .venv/bin/activate
 uv pip install -e ".[dev]"
 ```
 
 ### Dependency Issues
 
-```bash
-# Sync dependencies
-uv sync
+If you have dependency conflicts or installation issues:
 
-# Clear cache and reinstall
+**Option 1: Using uv sync (recommended)**
+```bash
+# Clear and reinstall with uv sync
 rm -rf .venv
-uv sync
+uv sync --extra dev
+.venv/bin/pre-commit install
+```
+
+**Option 2: Using uv pip**
+```bash
+# Clear and reinstall with uv pip
+rm -rf .venv
+uv venv
+source .venv/bin/activate
 uv pip install -e ".[dev]"
 .venv/bin/pre-commit install
 ```
@@ -269,4 +290,4 @@ python --version
 
 ---
 
-Thank you for contributing to chemeleon2! 🎉
+Thank you for contributing to chemeleon2!

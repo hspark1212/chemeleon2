@@ -6,7 +6,6 @@ from functools import partial
 
 import torch
 from lightning import LightningModule
-from peft import LoraConfig, get_peft_model
 from torch_geometric.utils import to_dense_batch
 
 from src.data.data_augmentation import apply_augmentation
@@ -47,13 +46,15 @@ class LDMModule(LightningModule):
 
         # Load pre-trained checkpoints
         if vae_ckpt_path is not None:
-            self.vae = VAEModule.load_from_checkpoint(vae_ckpt_path)
+            self.vae = VAEModule.load_from_checkpoint(vae_ckpt_path, weights_only=False)
             print(f"Loaded VAE from {vae_ckpt_path}")
         if ldm_ckpt_path is not None:  # for finetuning
             ckpt = torch.load(ldm_ckpt_path, weights_only=False)
             if vae_ckpt_path is None:
                 vae_ckpt_path = ckpt["hyper_parameters"]["vae_ckpt_path"]
-                self.vae = VAEModule.load_from_checkpoint(vae_ckpt_path)
+                self.vae = VAEModule.load_from_checkpoint(
+                    vae_ckpt_path, weights_only=False
+                )
                 print(f"Loaded VAE from {vae_ckpt_path} as in the LDM checkpoint.")
             self.load_state_dict(ckpt["state_dict"])
             print(f"Loaded pre-trained weights from {ldm_ckpt_path}")
@@ -75,6 +76,8 @@ class LDMModule(LightningModule):
 
         #  Lora
         if lora_configs is not None:
+            from peft import LoraConfig, get_peft_model
+
             self.lora_configs = LoraConfig(**lora_configs)
             self.denoiser = get_peft_model(self.denoiser, self.lora_configs)
             self.denoiser.print_trainable_parameters()

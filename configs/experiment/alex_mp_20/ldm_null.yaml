@@ -1,13 +1,9 @@
 # @package _global_
+# LDM training with null conditioning on Alex-MP-20
+# Changes from train_ldm.yaml: data -> alex_mp_20
+
 defaults:
   - override /data: alex_mp_20
-  - override /ldm_module: ldm_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
 
 ldm_module:
   vae_ckpt_path: ${hub:alex_mp_20_vae}

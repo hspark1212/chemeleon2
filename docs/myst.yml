@@ -1,0 +1,55 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: b6c7a361-dd91-4b1e-ac29-a4666a2fbeb0
+  title: Chemeleon2 Documentation
+  description: A reinforcement learning framework for crystal structure generation using latent diffusion models
+  keywords:
+    - crystal structure generation
+    - reinforcement learning
+    - latent diffusion model
+    - materials science
+  github: https://github.com/hspark1212/chemeleon2
+  license: MIT
+  toc:
+    - file: index.md
+    - title: Getting Started
+      children:
+        - file: getting-started/installation.md
+        - file: getting-started/quickstart.md
+    - title: User Guide
+      children:
+        - title: Training
+          children:
+            - file: user-guide/training/index.md
+            - file: user-guide/training/vae.md
+            - file: user-guide/training/ldm.md
+            - file: user-guide/training/rl.md
+            - file: user-guide/training/predictor.md
+        - file: user-guide/evaluation.md
+        - title: Custom Rewards
+          children:
+            - file: user-guide/rewards/index.md
+            - file: user-guide/rewards/atomic-density.md
+            - file: user-guide/rewards/dng-reward.md
+            - file: user-guide/rewards/predictor-reward.md
+    - title: Architecture Guide
+      children:
+        - file: architecture/index.md
+        - file: architecture/vae-module.md
+        - file: architecture/ldm-module.md
+        - file: architecture/rl-module.md
+        - file: architecture/data-pipeline.md
+    - title: API Reference
+      children:
+        - file: api/index.md
+    - title: Development
+      children:
+        - file: contributing.md
+
+site:
+  template: book-theme
+  options:
+    favicon: ../assets/logo.png
+    logo: ../assets/logo.png
+    # style: custom.css

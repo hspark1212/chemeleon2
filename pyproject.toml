@@ -19,7 +19,6 @@ dependencies = [
     "hydra-optuna-sweeper==1.2.0",
     "lightning>=2.5.4",
     "mp-api>=0.45.8",
-    "peft>=0.17.1",
     "pydantic>=2.11.7",
     "pymatgen>=2025.6.14",
     "pyyaml>=6.0",
@@ -33,9 +32,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-metrics = [
-    "mace-torch>=0.3.0",  # Energy calculations for e_above_hull
-    "smact>=3.2.0",       # Composition validity checks
+training = [
+    "mace-torch>=0.3.0",  # Energy calculations for e_above_hull in RL rewards
+    "smact>=3.2.0",       # Composition validity checks in RL rewards
 ]
 dev = [
     "jupyterlab>=4.4.6",  # Jupyter development environment

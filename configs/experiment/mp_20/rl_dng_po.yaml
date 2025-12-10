@@ -1,18 +1,12 @@
 # @package _global_
-defaults:
-  - override /data: mp-20
-  - override /rl_module: rl_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /paths: default
-  - override /hydra: default
+# REINFORCE for DNG on MP-20
+# Inherits all defaults from train_rl.yaml
 
 data:
   batch_size: 320
 
 rl_module:
-  ldm_ckpt_path: ${hub:mp_20_ldm}
+  ldm_ckpt_path: ${hub:mp_20_ldm_base}
   vae_ckpt_path: ${hub:mp_20_vae}
 
   rl_configs:
@@ -20,7 +14,23 @@ rl_module:
     group_reward_norm: False
 
   reward_fn:
-    reward_type: dng
+    _target_: src.rl_module.reward.ReinforceReward
+    normalize_fn: std
+    eps: 1e-4
+    reference_dataset: mp-20
+    components:
+      - _target_: src.rl_module.components.CreativityReward
+        weight: 1.0
+        normalize_fn: null
+      - _target_: src.rl_module.components.EnergyReward
+        weight: 1.0
+        normalize_fn: norm
+      - _target_: src.rl_module.components.StructureDiversityReward
+        weight: 0.1
+        normalize_fn: norm
+      - _target_: src.rl_module.components.CompositionDiversityReward
+        weight: 1.0
+        normalize_fn: norm
 
 logger:
   wandb:

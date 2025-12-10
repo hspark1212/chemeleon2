@@ -37,9 +37,13 @@ def featurize(
 
     # Load pre-trained VAE
     if model_path is None:
-        vae = VAEModule.load_from_checkpoint(DEFAULT_MODEL_PATH, map_location=device)
+        vae = VAEModule.load_from_checkpoint(
+            DEFAULT_MODEL_PATH, map_location=device, weights_only=False
+        )
     else:
-        vae = VAEModule.load_from_checkpoint(model_path, map_location=device)
+        vae = VAEModule.load_from_checkpoint(
+            model_path, map_location=device, weights_only=False
+        )
     vae.eval()
 
     # Featurize each structure

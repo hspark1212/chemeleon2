@@ -1,12 +1,6 @@
 # @package _global_
-defaults:
-  - override /ldm_module: ldm_module
-  - override /callbacks: default
-  - override /logger: wandb
-  - override /scheduler: constant
-  - override /trainer: default
-  - override /paths: default
-  - override /hydra: default
+# LDM training with bandgap conditioning and LoRA on Alex-MP-20-Bandgap
+# Inherits most defaults from train_ldm.yaml, but defines custom data config inline
 
 data:
   _target_: src.data.datamodule.DataModule
@@ -23,7 +17,7 @@ trainer:
   strategy: "ddp_find_unused_parameters_true"
 
 ldm_module:
-  ldm_ckpt_path: ${hub:alex_mp_20_ldm}
+  ldm_ckpt_path: ${hub:alex_mp_20_ldm_rl}
   vae_ckpt_path: ${hub:alex_mp_20_vae}
 
   condition_module:
