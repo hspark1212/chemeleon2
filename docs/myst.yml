@@ -19,9 +19,20 @@ project:
         - file: getting-started/quickstart.md
     - title: User Guide
       children:
-        - file: user-guide/training.md
+        - title: Training
+          children:
+            - file: user-guide/training/index.md
+            - file: user-guide/training/vae.md
+            - file: user-guide/training/ldm.md
+            - file: user-guide/training/rl.md
+            - file: user-guide/training/predictor.md
         - file: user-guide/evaluation.md
-        - file: user-guide/custom-rewards.md
+        - title: Custom Rewards
+          children:
+            - file: user-guide/rewards/index.md
+            - file: user-guide/rewards/atomic-density.md
+            - file: user-guide/rewards/dng-reward.md
+            - file: user-guide/rewards/predictor-reward.md
     - title: Architecture Guide
       children:
         - file: architecture/index.md

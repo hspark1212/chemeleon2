@@ -18,7 +18,7 @@ uv sync
 ```
 
 :::{tip}
-`uv sync` installs dependencies based on the `uv.lock` file, ensuring reproducible environments. If you encounter issues with `uv.lock` (e.g., lock file conflicts or compatibility problems), you can use the following alternative approach to install the package in editable mode directly from [`pyproject.toml`](../../pyproject.toml):
+`uv sync` installs dependencies based on the `uv.lock` file, ensuring reproducible environments. If you encounter issues with `uv.lock` (e.g., lock file conflicts or compatibility problems), you can use the following alternative approach to install the package in editable mode directly from [`pyproject.toml`](https://github.com/hspark1212/chemeleon2/blob/main/pyproject.toml):
 :::
 
 ```bash
