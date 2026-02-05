@@ -1,0 +1,21 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Cache directories
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+
+# Log files
+*.log
+
+# IDE and editor settings
+.claude/
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+tmp*/

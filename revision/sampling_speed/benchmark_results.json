@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-01-27T14:42:42.297102",
+  "sample_counts": [
+    320,
+    1000
+  ],
+  "num_trials": 3,
+  "batch_size": 1000,
+  "results": [
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 320,
+      "trial": 1,
+      "time_seconds": 8.322982786223292,
+      "samples_per_second": 38.447754635475576,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 320,
+      "trial": 2,
+      "time_seconds": 8.152195148169994,
+      "samples_per_second": 39.25323108486107,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 320,
+      "trial": 3,
+      "time_seconds": 8.341731812804937,
+      "samples_per_second": 38.36133877006037,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 1000,
+      "trial": 1,
+      "time_seconds": 14.678869797848165,
+      "samples_per_second": 68.12513591111723,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 1000,
+      "trial": 2,
+      "time_seconds": 14.696662174537778,
+      "samples_per_second": 68.04266085210268,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon2",
+      "num_samples": 1000,
+      "trial": 3,
+      "time_seconds": 14.672173508442938,
+      "samples_per_second": 68.15622780255163,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 320,
+      "trial": 1,
+      "time_seconds": 32.31012713164091,
+      "samples_per_second": 9.904015502514936,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 320,
+      "trial": 2,
+      "time_seconds": 30.973722734488547,
+      "samples_per_second": 10.331338042349271,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 320,
+      "trial": 3,
+      "time_seconds": 31.716017582453787,
+      "samples_per_second": 10.089539115939738,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 1000,
+      "trial": 1,
+      "time_seconds": 90.91452935989946,
+      "samples_per_second": 10.99934198681646,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 1000,
+      "trial": 2,
+      "time_seconds": 83.93380760774016,
+      "samples_per_second": 11.914150310843072,
+      "success": true,
+      "error_message": null
+    },
+    {
+      "framework": "Chemeleon1",
+      "num_samples": 1000,
+      "trial": 3,
+      "time_seconds": 87.04296208918095,
+      "samples_per_second": 11.488579616298416,
+      "success": true,
+      "error_message": null
+    }
+  ]
+}
