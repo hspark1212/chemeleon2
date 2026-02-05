@@ -1,8 +1,9 @@
 import warnings
+
 import numpy as np
-from scipy.stats import entropy
-from pymatgen.core import Structure
 from matminer.featurizers.site.fingerprint import OPSiteFingerprint
+from pymatgen.core import Structure
+from scipy.stats import entropy
 
 N_POLYHEDRA = 37
 _FEATURIZER = None

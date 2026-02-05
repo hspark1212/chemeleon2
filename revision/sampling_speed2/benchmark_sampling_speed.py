@@ -9,14 +9,13 @@ Usage:
 """
 
 import json
-import os
 import sys
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -102,6 +101,7 @@ class GPUTimer:
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark run."""
+
     model: str
     num_samples: int
     run_idx: int
@@ -127,7 +127,9 @@ def setup_paths():
             sys.path.insert(0, path_str)
 
 
-def get_num_atoms_distribution(num_samples: int, distribution: str = "mp-20") -> list[int]:
+def get_num_atoms_distribution(
+    num_samples: int, distribution: str = "mp-20"
+) -> list[int]:
     """Get a list of num_atoms based on the specified distribution."""
     # Use Chemeleon2's distribution
     sys.path.insert(0, str(CHEMELEON2_PATH))
@@ -194,7 +196,7 @@ class Chemeleon2Sampler:
         total_time = 0.0
 
         for i in range(0, num_samples, batch_size):
-            batch_num_atoms = num_atoms[i:i + batch_size]
+            batch_num_atoms = num_atoms[i : i + batch_size]
             batch = create_empty_batch(batch_num_atoms, device=self.device)
 
             # Time this batch
@@ -278,7 +280,7 @@ class Chemeleon1Sampler:
         total_time = 0.0
 
         for i in range(0, num_samples, batch_size):
-            batch_num_atoms = num_atoms[i:i + batch_size]
+            batch_num_atoms = num_atoms[i : i + batch_size]
 
             def sample_batch():
                 with torch.no_grad():
@@ -310,8 +312,8 @@ class MatterGenSampler:
             return
 
         sys.path.insert(0, str(MATTERGEN_PATH))
-        from mattergen.generator import CrystalGenerator
         from mattergen.common.utils.data_classes import MatterGenCheckpointInfo
+        from mattergen.generator import CrystalGenerator
 
         print("Loading MatterGen model...")
         # Use the pretrained model from HuggingFace Hub
@@ -444,7 +446,9 @@ def benchmark_model(
                 per_batch_times=per_batch_times,
                 success=True,
             )
-            print(f"    Time: {total_time:.2f}s, Speed: {samples_per_sec:.2f} samples/s")
+            print(
+                f"    Time: {total_time:.2f}s, Speed: {samples_per_sec:.2f} samples/s"
+            )
 
         except Exception as e:
             result = BenchmarkResult(
@@ -505,15 +509,17 @@ def save_results(results: list[BenchmarkResult]) -> pd.DataFrame:
     # Create flattened data for CSV
     csv_data = []
     for r in results:
-        csv_data.append({
-            "model": r.model,
-            "num_samples": r.num_samples,
-            "run_idx": r.run_idx,
-            "total_time_seconds": r.total_time_seconds,
-            "samples_per_second": r.samples_per_second,
-            "success": r.success,
-            "error_message": r.error_message,
-        })
+        csv_data.append(
+            {
+                "model": r.model,
+                "num_samples": r.num_samples,
+                "run_idx": r.run_idx,
+                "total_time_seconds": r.total_time_seconds,
+                "samples_per_second": r.samples_per_second,
+                "success": r.success,
+                "error_message": r.error_message,
+            }
+        )
 
     df = pd.DataFrame(csv_data)
     csv_path = RESULTS_DIR / "raw_timing_data.csv"
@@ -573,7 +579,7 @@ def create_visualizations(df: pd.DataFrame) -> None:
     model_colors = {
         "Chemeleon2": "#2ecc71",  # Green
         "Chemeleon1": "#3498db",  # Blue
-        "MatterGen": "#e74c3c",   # Red
+        "MatterGen": "#e74c3c",  # Red
     }
 
     # 1. Sampling Speed Comparison (Total Time with Error Bars)
@@ -595,9 +601,7 @@ def create_visualizations(df: pd.DataFrame) -> None:
             legend=False,
         )
         ax.set_title(
-            f"Sampling Time ({num_samples} samples)",
-            fontsize=14,
-            fontweight="bold"
+            f"Sampling Time ({num_samples} samples)", fontsize=14, fontweight="bold"
         )
         ax.set_xlabel("Model", fontsize=12)
         ax.set_ylabel("Time (seconds)", fontsize=12)
@@ -631,9 +635,7 @@ def create_visualizations(df: pd.DataFrame) -> None:
             legend=False,
         )
         ax.set_title(
-            f"Throughput ({num_samples} samples)",
-            fontsize=14,
-            fontweight="bold"
+            f"Throughput ({num_samples} samples)", fontsize=14, fontweight="bold"
         )
         ax.set_xlabel("Model", fontsize=12)
         ax.set_ylabel("Samples per Second", fontsize=12)
@@ -658,13 +660,15 @@ def create_visualizations(df: pd.DataFrame) -> None:
     for r in json_data["results"]:
         if r["success"]:
             for batch_idx, batch_time in enumerate(r["per_batch_times"]):
-                batch_data.append({
-                    "model": r["model"],
-                    "num_samples": r["num_samples"],
-                    "run_idx": r["run_idx"],
-                    "batch_idx": batch_idx,
-                    "batch_time": batch_time,
-                })
+                batch_data.append(
+                    {
+                        "model": r["model"],
+                        "num_samples": r["num_samples"],
+                        "run_idx": r["run_idx"],
+                        "batch_idx": batch_idx,
+                        "batch_time": batch_time,
+                    }
+                )
 
     if batch_data:
         df_batch = pd.DataFrame(batch_data)
@@ -672,7 +676,12 @@ def create_visualizations(df: pd.DataFrame) -> None:
         fig, ax = plt.subplots(figsize=(12, 6))
 
         # Create grouped boxplot
-        df_batch["config"] = df_batch["model"] + "\n(" + df_batch["num_samples"].astype(str) + " samples)"
+        df_batch["config"] = (
+            df_batch["model"]
+            + "\n("
+            + df_batch["num_samples"].astype(str)
+            + " samples)"
+        )
 
         sns.boxplot(
             data=df_batch,
@@ -714,8 +723,13 @@ def create_visualizations(df: pd.DataFrame) -> None:
     # Reset index for table display
     summary_reset = summary.reset_index()
     summary_reset.columns = [
-        "Model", "Samples", "Mean Time (s)", "Std Time (s)",
-        "Mean Throughput", "Std Throughput", "N Runs"
+        "Model",
+        "Samples",
+        "Mean Time (s)",
+        "Std Time (s)",
+        "Mean Throughput",
+        "Std Throughput",
+        "N Runs",
     ]
 
     table = ax.table(
@@ -738,7 +752,9 @@ def create_visualizations(df: pd.DataFrame) -> None:
         model = row[0]
         color = model_colors.get(model, "#ffffff")
         for col_idx in range(len(row)):
-            table[(row_idx + 1, col_idx)].set_facecolor(color + "40")  # Add transparency
+            table[(row_idx + 1, col_idx)].set_facecolor(
+                color + "40"
+            )  # Add transparency
 
     plt.title("Benchmark Summary Statistics", fontsize=14, fontweight="bold", pad=20)
     plt.tight_layout()
@@ -764,7 +780,7 @@ def main():
     print("=" * 60)
     print("SAMPLING SPEED BENCHMARK")
     print("=" * 60)
-    print(f"Models: Chemeleon2, Chemeleon1, MatterGen")
+    print("Models: Chemeleon2, Chemeleon1, MatterGen")
     print(f"Sample counts: {NUM_SAMPLES_LIST}")
     print(f"Batch size: {BATCH_SIZE}")
     print(f"Warmup runs: {NUM_WARMUP_RUNS}")

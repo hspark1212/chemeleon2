@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Compute multi-metric structural novelty for generated crystal structures.
+"""Compute multi-metric structural novelty for generated crystal structures.
 
 Metrics:
 1. Space Group Novelty - How rare is the space group in training set
@@ -13,9 +12,7 @@ Output: chemeleon2_structural_novelty.pkl.gz
 import gzip
 import io
 import pickle
-import warnings
 from collections import Counter
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -40,8 +37,7 @@ class StructuralNoveltyCalculator:
 		stol: float = 0.3,
 		angle_tol: float = 5.0,
 	):
-		"""
-		Initialize calculator with training structures.
+		"""Initialize calculator with training structures.
 
 		Args:
 			training_structures: List of training Structure objects
@@ -103,8 +99,7 @@ class StructuralNoveltyCalculator:
 		return str(cns_sorted)
 
 	def space_group_novelty(self, structure: Structure) -> dict:
-		"""
-		Check if structure has a rare space group.
+		"""Check if structure has a rare space group.
 
 		Returns:
 			dict with space_group, sg_count_in_train, sg_rarity_score
@@ -127,8 +122,7 @@ class StructuralNoveltyCalculator:
 		}
 
 	def structure_match_novelty(self, structure: Structure) -> dict:
-		"""
-		Check if structure matches any training structure.
+		"""Check if structure matches any training structure.
 
 		Returns:
 			dict with has_match, match_index (or None)
@@ -153,8 +147,7 @@ class StructuralNoveltyCalculator:
 		}
 
 	def coordination_novelty(self, structure: Structure) -> dict:
-		"""
-		Check if coordination pattern is rare.
+		"""Check if coordination pattern is rare.
 
 		Returns:
 			dict with cn_pattern, cn_count_in_train, cn_rarity_score
@@ -175,8 +168,7 @@ class StructuralNoveltyCalculator:
 	def compute_novelty(
 		self, structure: Structure, check_structure_match: bool = False
 	) -> dict:
-		"""
-		Compute combined novelty score for a structure.
+		"""Compute combined novelty score for a structure.
 
 		Args:
 			structure: Structure to analyze
@@ -299,7 +291,7 @@ def main():
 	print("=" * 60)
 	print(f"Total samples: {len(results)}")
 	print(f"Valid samples: {np.sum(~np.isnan(novelty_scores))}")
-	print(f"\nNovelty Score:")
+	print("\nNovelty Score:")
 	print(f"  Mean:   {np.nanmean(novelty_scores):.4f}")
 	print(f"  Std:    {np.nanstd(novelty_scores):.4f}")
 	print(f"  Min:    {np.nanmin(novelty_scores):.4f}")
@@ -330,14 +322,16 @@ def main():
 	print("RARE SPACE GROUPS IN GENERATED SAMPLES")
 	print("-" * 60)
 
-	sg_counts = Counter([r.get("space_group", 0) for r in results if "space_group" in r])
+	sg_counts = Counter(
+		[r.get("space_group", 0) for r in results if "space_group" in r]
+	)
 	rare_sgs = [
 		(sg, count)
 		for sg, count in sg_counts.most_common()
 		if calc.sg_counter.get(sg, 0) <= 5
 	]
 
-	print(f"Space groups with <=5 occurrences in training set:")
+	print("Space groups with <=5 occurrences in training set:")
 	for sg, gen_count in rare_sgs[:15]:
 		train_count = calc.sg_counter.get(sg, 0)
 		print(f"  SG {sg:3d}: {gen_count:4d} generated, {train_count:3d} in training")

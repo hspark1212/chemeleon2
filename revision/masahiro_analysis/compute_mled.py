@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Calculate M_LED (Metric for Local Environment Diversity) for crystal structures.
+"""Calculate M_LED (Metric for Local Environment Diversity) for crystal structures.
 
 M_LED quantifies structural complexity through Shannon entropy of:
 1. Polyhedral environments (coordination geometry)
@@ -9,19 +8,17 @@ M_LED quantifies structural complexity through Shannon entropy of:
 Higher entropy indicates greater local structural diversity.
 """
 
-import sys
 import argparse
-from pathlib import Path
-from typing import Tuple, List, Optional
+import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import entropy
-from pymatgen.core import Structure, Element
-from pymatgen.analysis.local_env import CrystalNN
 from matminer.featurizers.site.fingerprint import OPSiteFingerprint
-
+from pymatgen.analysis.local_env import CrystalNN
+from pymatgen.core import Structure
+from scipy.stats import entropy
 
 # Constants
 VALID_ELEMENTS = [
@@ -149,8 +146,7 @@ class MLEDCalculationError(Exception):
 
 
 class LocalEnvironmentDiversityCalculator:
-	"""
-	Calculator for M_LED (Metric for Local Environment Diversity).
+	"""Calculator for M_LED (Metric for Local Environment Diversity).
 
 	Attributes:
 	    featurizer: Site fingerprint featurizer for polyhedral identification
@@ -158,9 +154,8 @@ class LocalEnvironmentDiversityCalculator:
 	    elements: List of valid elements to consider
 	"""
 
-	def __init__(self, elements: List[str] = VALID_ELEMENTS, use_voronoi: bool = False):
-		"""
-		Initialize M_LED calculator.
+	def __init__(self, elements: list[str] = VALID_ELEMENTS, use_voronoi: bool = False):
+		"""Initialize M_LED calculator.
 
 		Args:
 		    elements: List of valid element symbols to consider
@@ -186,8 +181,7 @@ class LocalEnvironmentDiversityCalculator:
 
 	@staticmethod
 	def calculate_shannon_entropy(vector: np.ndarray) -> float:
-		"""
-		Calculate Shannon entropy of a probability distribution.
+		"""Calculate Shannon entropy of a probability distribution.
 
 		Args:
 		    vector: Count or frequency vector
@@ -206,8 +200,7 @@ class LocalEnvironmentDiversityCalculator:
 	def positional_encoding(
 		self, feature_vector: np.ndarray, sigma: float = POSITIONAL_SIGMA
 	) -> np.ndarray:
-		"""
-		Apply Gaussian positional encoding to feature vector.
+		"""Apply Gaussian positional encoding to feature vector.
 
 		This smooths the discrete feature counts into a continuous representation
 		that captures local correlations between features.
@@ -237,9 +230,8 @@ class LocalEnvironmentDiversityCalculator:
 
 	def featurize_structure(
 		self, structure: Structure
-	) -> Tuple[np.ndarray, float, float]:
-		"""
-		Extract local environment features and calculate entropy metrics.
+	) -> tuple[np.ndarray, float, float]:
+		"""Extract local environment features and calculate entropy metrics.
 
 		Args:
 		    structure: Pymatgen Structure object
@@ -312,8 +304,7 @@ class LocalEnvironmentDiversityCalculator:
 			raise MLEDCalculationError(f"Failed to featurize structure: {e}") from e
 
 	def is_valid_structure(self, structure: Structure) -> bool:
-		"""
-		Check if structure contains only valid elements.
+		"""Check if structure contains only valid elements.
 
 		Args:
 		    structure: Pymatgen Structure object
@@ -331,10 +322,9 @@ class LocalEnvironmentDiversityCalculator:
 		self,
 		df: pd.DataFrame,
 		cif_column: str = "cif",
-		sample_size: Optional[int] = None,
+		sample_size: int | None = None,
 	) -> pd.DataFrame:
-		"""
-		Calculate M_LED metrics for all structures in a DataFrame.
+		"""Calculate M_LED metrics for all structures in a DataFrame.
 
 		Args:
 		    df: Input DataFrame with CIF strings
@@ -426,7 +416,7 @@ class LocalEnvironmentDiversityCalculator:
 		# Print statistics
 		if len(df_result) > 0:
 			print(f"\nM_LED statistics (n={len(df_result)}):")
-			print(f"  Total entropy:")
+			print("  Total entropy:")
 			print(f"    Mean:   {df_result['entropy_total'].mean():.4f}")
 			print(f"    Median: {df_result['entropy_total'].median():.4f}")
 			print(f"    Std:    {df_result['entropy_total'].std():.4f}")
@@ -532,7 +522,7 @@ def main():
 		df_result.to_csv(output_path, index=False)
 		print(f"\nResults saved to: {output_path}")
 		print(
-			f"Added columns: entropy_positional, entropy_polyhedral, entropy_total, mled_features"
+			"Added columns: entropy_positional, entropy_polyhedral, entropy_total, mled_features"
 		)
 	except Exception as e:
 		print(f"Error saving output: {e}", file=sys.stderr)
